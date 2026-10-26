@@ -1,6 +1,6 @@
 ---
 name: video-flat-edukasi
-description: Membuat video animasi edukasi pendek vertikal 9:16 (TikTok/Reels/Shorts) bergaya flat vector ala akun sains "GEGARA" — latar navy, teks kecil + KATA KUNCI besar berwarna, ilustrasi flat (tanah, awan, bakteri, wajah profil, molekul, label pil), animasi pop/fade cepat per scene. Inputnya topik + naskah per scene; outputnya MP4 1080x1920 lengkap dengan voiceover bahasa Indonesia otomatis (edge-tts) yang sinkron per scene, plus file HTML sumber dan subtitle. Gunakan skill ini setiap kali pengguna minta dibuatkan video edukasi/explainer/fakta unik/sains singkat, konten "kenapa ...?", animasi motion graphic untuk TikTok/Reels, atau menyebut video-flat-edukasi / gaya GEGARA — walaupun pengguna hanya memberi topik tanpa naskah.
+description: Membuat video animasi edukasi pendek vertikal 9:16 (TikTok/Reels/Shorts) bergaya flat vector ala akun sains "GEGARA" — latar navy, teks kecil + KATA KUNCI besar berwarna, ilustrasi flat (tanah, awan, bakteri, wajah profil, molekul, label pil), animasi pop/fade cepat per scene. Inputnya topik + naskah per scene; outputnya MP4 1080x1920 lengkap dengan voiceover bahasa Indonesia otomatis (ElevenLabs / edge-tts / situs TTS via browser) yang sinkron per scene, plus file HTML sumber dan subtitle. Gunakan skill ini setiap kali pengguna minta dibuatkan video edukasi/explainer/fakta unik/sains singkat, konten "kenapa ...?", animasi motion graphic untuk TikTok/Reels, atau menyebut video-flat-edukasi / gaya GEGARA — walaupun pengguna hanya memberi topik tanpa naskah.
 ---
 
 # Video Flat Edukasi
@@ -69,15 +69,13 @@ diam, sementara elemen baru muncul.
    penuh: `render.js <file>.html --frames 11.5,40` (detik, dipisah koma).
 7. Render MP4 final dengan voiceover: `node <skill>/scripts/render.js <file>.html <file>.mp4`
    (opsi: `--voice id-ID-ArdiNeural` untuk suara pria, `--rate +15%`, `--music lagu.mp3`).
-   Skrip membuat suara tiap scene dengan edge-tts, memperpanjang scene yang suaranya lebih panjang
+   Skrip membuat suara tiap scene (sumber dipilih sesuai bagian Voiceover), memperpanjang scene yang suaranya lebih panjang
    dari `dur`, lalu menggabungkan semuanya. Hasilnya `<file>.mp4`, `<file>-narasi.txt`, dan
    `<file>.srt`. Lama render ± 2× durasi video.
 
 ## Voiceover
 
-Suara default adalah `id-ID-GadisNeural` (wanita) dari edge-tts: gratis dan natural, tapi butuh
-internet ke `speech.platform.bing.com` dan `pip install edge-tts`. Pilihan lain: `id-ID-ArdiNeural`
-(pria).
+### Menulis teks `vo`
 
 Teks di layar ditulis untuk mata, sedangkan `vo` ditulis untuk telinga. Isi `vo` jika:
 - teks layar mengandung singkatan, simbol, atau angka yang dibaca aneh oleh TTS:
@@ -89,16 +87,49 @@ Teks di layar ditulis untuk mata, sedangkan `vo` ditulis untuk telinga. Isi `vo`
 Satu scene sebaiknya bersuara ≤ 12 kata (± 3 detik), karena tempo cepat adalah inti gaya ini.
 Outro tidak bersuara kecuali diberi `vo`.
 
-Jika edge-tts gagal (tidak ada internet atau host diblokir), skrip berhenti dengan pesan jelas.
-Jangan diam-diam membuat video tanpa suara: beri tahu pengguna, lalu render `--no-vo` sebagai
-cadangan. Mode ini tetap menulis `-narasi.txt` dan `.srt` dengan rentang detik tiap kalimat
-(`[3.5s - 6.1s] ...`) sesuai timeline video, sehingga pengguna bisa merekam atau men-dub sendiri.
-Sertakan juga perintah render agar mereka bisa membuat versi bersuara di komputer sendiri. Pengguna yang punya rekaman suara sendiri bisa memakai `--audio rekaman.mp3`
-(durasi scene tidak diubah).
+### Memilih sumber suara
+
+Coba berurutan dan pakai yang pertama berhasil. Setiap jalur menghasilkan satu klip per scene,
+jadi durasi scene, `-narasi.txt`, dan `.srt` selalu sinkron dengan suara aslinya.
+
+1. **ElevenLabs API**, jika `ELEVENLABS_API_KEY` tersedia di environment (render.js otomatis
+   memakainya). Gratis ± 10.000 karakter/bulan, dan satu video ≈ 1.000–1.500 karakter. Suara
+   default "Rachel" (multilingual v2); pengguna bisa memilih voice ID lain lewat `--voice <id>`.
+2. **edge-tts** (default tanpa key; gratis, suara Indonesia natural `id-ID-GadisNeural` /
+   `id-ID-ArdiNeural`). Cukup jalankan `render.js`. Butuh `pip install edge-tts` dan internet ke
+   `speech.platform.bing.com`.
+3. **Situs TTS lewat browser**, jika kedua cara di atas gagal (host diblokir, tidak ada key) DAN
+   kamu punya alat browser (Claude in Chrome `mcp__claude-in-chrome__*`, atau browser bawaan
+   aplikasi desktop `mcp__Claude_Browser__*` / `mcp__remote-devices__Claude_Browser__*`). Muat
+   skill browser yang sesuai sebelum langkah browser pertama, lalu:
+   - `node <skill>/scripts/render.js <file>.html --list-vo` → `<file>-vo-lines.txt` berisi
+     `01 | kalimat`, `02 | kalimat`, ...
+   - Buka tab baru ke situs TTS. Utamakan **elevenlabs.io** (Text to Speech, model Multilingual v2,
+     pengguna biasanya sudah login). Jika tidak bisa, pakai situs gratis lain yang mendukung
+     bahasa Indonesia dan unduhan MP3, misalnya **ttsmaker.com**. Pakai suara yang sama untuk
+     semua kalimat.
+   - Buat dan unduh **satu file per kalimat**, lalu ganti namanya sesuai nomor: `vo-01.mp3`,
+     `vo-02.mp3`, ... ke satu folder. Penomoran ini yang menyinkronkan suara ke scene.
+   - `node <skill>/scripts/render.js <file>.html <file>.mp4 --vo-dir <folder>`
+   - Jika situs meminta login, CAPTCHA, atau pembayaran, berhenti dan minta pengguna
+     menyelesaikannya. Jangan membuat akun atau mengisi data pembayaran atas nama pengguna.
+
+   Catatan: unduhan dari browser masuk ke komputer pengguna. Jalur ini hanya bisa jika Claude
+   berjalan di komputer yang sama (Claude Code lokal / aplikasi desktop). Di sesi cloud, file
+   unduhan tidak sampai ke container, jadi lewati jalur ini.
+4. **Tanpa suara** (cadangan terakhir, beri tahu pengguna; jangan diam-diam): render `--no-vo`.
+   Mode ini tetap menulis `-narasi.txt` dan `.srt` dengan rentang detik tiap kalimat
+   (`[3.5s - 6.1s] ...`) sesuai timeline video, untuk direkam atau di-dub sendiri. Berikan juga
+   `-vo-lines.txt` dan perintah `--vo-dir` agar pengguna bisa membuat versi bersuara nanti.
+   Sebutkan host yang diblokir (`speech.platform.bing.com`, `api.elevenlabs.io`) supaya pengguna
+   bisa mengizinkannya.
+
+Pengguna yang punya rekaman utuh sendiri bisa memakai `--audio rekaman.mp3` (durasi scene tidak
+diubah); yang punya rekaman per kalimat sebaiknya memakai `--vo-dir`.
 
 ## Kebutuhan
 
-Node, `playwright` (Chromium), `ffmpeg`, dan `edge-tts` untuk suara. Jika tidak tersedia,
+Node, `playwright` (Chromium), `ffmpeg`, dan salah satu sumber suara di atas. Jika tidak tersedia,
 serahkan file HTML-nya saja: pengguna bisa membukanya di Chrome (klik PUTAR atau spasi;
 `?autoplay` di URL) lalu merekam layar. `?t=12` menampilkan detik ke-12 untuk pengecekan.
 

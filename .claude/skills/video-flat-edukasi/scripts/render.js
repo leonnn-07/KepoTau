@@ -3,21 +3,26 @@
  * Render video HTML (dari template video-flat-edukasi) ke MP4 lengkap dengan voiceover.
  *
  *   node render.js video.html [video.mp4] [opsi]
- *     --voice id-ID-GadisNeural   suara edge-tts (atau id-ID-ArdiNeural untuk suara pria)
- *     --rate +10%                 kecepatan bicara
+ *     --tts edge|elevenlabs       sumber suara. Default: elevenlabs jika ELEVENLABS_API_KEY ada, selain itu edge
+ *     --voice id-ID-GadisNeural   suara edge-tts (id-ID-ArdiNeural = pria) atau voice_id ElevenLabs
+ *     --rate +10%                 kecepatan bicara (edge-tts)
+ *     --vo-dir folder/            pakai file suara jadi per scene: vo-01.mp3, vo-02.mp3, ... (mis. hasil
+ *                                 unduhan dari situs TTS di browser); durasi scene tetap disesuaikan
  *     --music lagu.mp3            musik latar (otomatis di-loop & dikecilkan)
  *     --audio narasi.mp3          pakai rekaman suara sendiri (tanpa TTS, durasi scene tidak diubah)
  *     --no-vo                     video tanpa suara
  *     --fps 30
  *   node render.js video.html --preview preview.png      # lembar kontak 1 frame per scene
  *   node render.js video.html --frames 11.5,67           # screenshot ukuran penuh di detik tertentu
+ *   node render.js video.html --list-vo                  # tulis <nama>-vo-lines.txt: kalimat VO per scene
  *
  * Voiceover: teks tiap scene (field `vo`, default teks kecil + kata kunci) diubah jadi suara
- * dengan edge-tts per scene, lalu durasi scene otomatis diperpanjang agar pas dengan suaranya.
+ * per scene (edge-tts / ElevenLabs API / file di --vo-dir), lalu durasi scene otomatis diperpanjang agar pas dengan suaranya.
  * Hasil tambahan: <nama>-narasi.txt dan <nama>.srt (subtitle).
  *
  * Butuh: Node, playwright (npm i playwright && npx playwright install chromium), ffmpeg,
- *        dan untuk voiceover: pip install edge-tts (perlu internet).
+ *        untuk voiceover: pip install edge-tts (internet ke speech.platform.bing.com),
+ *        atau ELEVENLABS_API_KEY (api.elevenlabs.io; paket gratis ± 10.000 karakter/bulan).
  */
 const path = require('path');
 const fs = require('fs');
@@ -31,14 +36,17 @@ const flag = k => args.includes(k);
 const input = args[0];
 if (!input || !fs.existsSync(input)) { console.error('Pemakaian: node render.js video.html [out.mp4] [--voice ...] [--music file] [--audio file] [--no-vo] | --preview out.png'); process.exit(1); }
 const fps = +opt('--fps', 30);
-const voice = opt('--voice', 'id-ID-GadisNeural');
+const engine = opt('--tts', process.env.ELEVENLABS_API_KEY ? 'elevenlabs' : 'edge');
+const voice = opt('--voice', engine === 'elevenlabs' ? '21m00Tcm4TlvDq8ikWAM' : 'id-ID-GadisNeural');
+const voDir = opt('--vo-dir');
+const listVO = flag('--list-vo');
 const rate = opt('--rate', '+10%');
 const music = opt('--music');
 const ownAudio = opt('--audio');
 const preview = opt('--preview');
 const framesAt = opt('--frames');
-const useVO = !preview && !framesAt && !ownAudio && !flag('--no-vo');
-const out = (preview || framesAt) ? null : (args[1] && !args[1].startsWith('--') ? args[1] : input.replace(/\.html?$/, '') + '.mp4');
+const useVO = !preview && !framesAt && !listVO && !ownAudio && !flag('--no-vo');
+const out = (preview || framesAt || listVO) ? null : (args[1] && !args[1].startsWith('--') ? args[1] : input.replace(/\.html?$/, '') + '.mp4');
 const base = (out || input).replace(/\.(mp4|html?)$/, '');
 const LEAD = 0.25, TAIL = 0.45; // jeda sebelum & sesudah suara di tiap scene
 
@@ -47,7 +55,28 @@ const dur = f => parseFloat(sh('ffprobe', ['-v', 'error', '-show_entries', 'form
 const ts = t => { const ms = Math.round(t * 1000); const p = (n, w = 2) => String(n).padStart(w, '0');
   return `${p(Math.floor(ms / 3600000))}:${p(Math.floor(ms / 60000) % 60)}:${p(Math.floor(ms / 1000) % 60)},${p(ms % 1000, 3)}`; };
 
+function ttsElevenLabs(text, file) {
+  const key = process.env.ELEVENLABS_API_KEY;
+  if (!key) throw new Error('ELEVENLABS_API_KEY belum di-set.');
+  const r = sh('curl', ['-sS', '-w', '%{http_code}', '-o', file, '-X', 'POST',
+    `https://api.elevenlabs.io/v1/text-to-speech/${voice}?output_format=mp3_44100_128`,
+    '-H', `xi-api-key: ${key}`, '-H', 'Content-Type: application/json',
+    '-d', JSON.stringify({ text, model_id: 'eleven_multilingual_v2' })]);
+  const code = (r.stdout || '').trim();
+  if (code !== '200') {
+    const msg = fs.existsSync(file) ? fs.readFileSync(file, 'utf8').slice(0, 300) : (r.stderr || '');
+    throw new Error(`ElevenLabs gagal (HTTP ${code || '-'}): ${msg}`);
+  }
+}
+
+function voFile(i) {
+  const n = String(i + 1).padStart(2, '0');
+  for (const ext of ['mp3', 'wav', 'm4a', 'ogg']) { const f = path.join(voDir, `vo-${n}.${ext}`); if (fs.existsSync(f)) return f; }
+  return null;
+}
+
 function tts(text, file) {
+  if (engine === 'elevenlabs') return ttsElevenLabs(text, file);
   const a = ['-m', 'edge_tts', '--voice', voice, `--rate=${rate}`, '--text', text, '--write-media', file];
   if (process.env.HTTPS_PROXY) a.push('--proxy', process.env.HTTPS_PROXY);
   for (let k = 0; k < 3; k++) {
@@ -71,6 +100,13 @@ function tts(text, file) {
   if (!(await page.evaluate(async () => { try { await Promise.all(['500 40px Poppins', '900 40px Poppins'].map(f => document.fonts.load(f))); } catch (e) {} return document.fonts.check('900 40px Poppins'); })))
     console.warn('Peringatan: font Poppins gagal dimuat (offline?) — teks memakai font cadangan.');
 
+  if (listVO) {
+    const f = base + '-vo-lines.txt';
+    fs.writeFileSync(f, scenes.map((sc, i) => (sc.vo || '').trim() ? `${String(i + 1).padStart(2, '0')} | ${sc.vo.trim()}` : null).filter(Boolean).join('\n') + '\n');
+    console.log(`Kalimat VO: ${f}  (simpan suaranya sebagai vo-01.mp3, vo-02.mp3, ... sesuai nomor)`);
+    await browser.close(); return;
+  }
+
   // ---- voiceover per scene ----
   let clips = [];
   if (useVO) {
@@ -79,8 +115,14 @@ function tts(text, file) {
     for (let i = 0; i < scenes.length; i++) {
       const text = (scenes[i].vo || '').trim();
       if (!text) { durs.push(scenes[i].dur); continue; }
-      process.stdout.write(`\rVoiceover ${i + 1}/${scenes.length}`);
-      const f = path.join(dir, `vo${i}.mp3`); tts(text, f);
+      let f;
+      if (voDir) {
+        f = voFile(i);
+        if (!f) { console.warn(`\nScene ${i + 1}: file vo-${String(i + 1).padStart(2, '0')}.* tidak ada di ${voDir}, scene ini tanpa suara.`); durs.push(scenes[i].dur); continue; }
+      } else {
+        process.stdout.write(`\rVoiceover ${i + 1}/${scenes.length} (${engine})`);
+        f = path.join(dir, `vo${i}.mp3`); tts(text, f);
+      }
       const d = dur(f); clips.push({ i, f, d, text });
       durs.push(Math.max(scenes[i].dur, LEAD + d + TAIL));
     }
@@ -144,7 +186,7 @@ function tts(text, file) {
     proc.stdin.end();
     const code = await new Promise(r => proc.on('close', r));
     if (code !== 0) { console.error('\nffmpeg gagal'); process.exit(1); }
-    console.log(`\nSelesai: ${out} (${total.toFixed(1)} detik, ${fps} fps${clips.length ? `, voiceover ${clips.length} klip, ${voice}` : ''})`);
+    console.log(`\nSelesai: ${out} (${total.toFixed(1)} detik, ${fps} fps${clips.length ? `, voiceover ${clips.length} klip, ${voDir ? voDir : engine + ' ' + voice}` : ''})`);
     console.log(`Naskah VO: ${base}-narasi.txt  Subtitle: ${base}.srt`);
   }
   if (errors.length) { console.error('Error di halaman:\n' + errors.join('\n')); process.exitCode = 2; }
