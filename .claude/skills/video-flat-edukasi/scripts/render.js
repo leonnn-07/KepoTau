@@ -68,7 +68,7 @@ function tts(text, file) {
   await page.goto(url);
   let total = await page.evaluate(() => window.__ready);
   let scenes = await page.evaluate(() => window.__SCENES);
-  if (!(await page.evaluate(() => document.fonts.check('900 40px Poppins'))))
+  if (!(await page.evaluate(async () => { try { await Promise.all(['500 40px Poppins', '900 40px Poppins'].map(f => document.fonts.load(f))); } catch (e) {} return document.fonts.check('900 40px Poppins'); })))
     console.warn('Peringatan: font Poppins gagal dimuat (offline?) — teks memakai font cadangan.');
 
   // ---- voiceover per scene ----
@@ -90,8 +90,15 @@ function tts(text, file) {
     total = await page.evaluate(() => window.__ready);
     scenes = await page.evaluate(() => window.__SCENES);
     clips.forEach(c => { c.at = scenes[c.i].start + LEAD; });
-    fs.writeFileSync(base + '-narasi.txt', clips.map(c => `[${c.at.toFixed(1)}s] ${c.text}`).join('\n') + '\n');
+    fs.writeFileSync(base + '-narasi.txt', clips.map(c => `[${c.at.toFixed(1)}s - ${(c.at + c.d).toFixed(1)}s] ${c.text}`).join('\n') + '\n');
     fs.writeFileSync(base + '.srt', clips.map((c, k) => `${k + 1}\n${ts(c.at)} --> ${ts(c.at + c.d)}\n${c.text}\n`).join('\n'));
+  }
+
+  if (!useVO && !preview && !framesAt) {
+    // tanpa TTS: tetap tulis naskah VO bertimestamp sesuai timeline video untuk direkam/di-dub manual
+    const rows = scenes.map(sc => ({ at: sc.start + LEAD, end: sc.end - 0.1, text: (sc.vo || '').trim() })).filter(r => r.text);
+    fs.writeFileSync(base + '-narasi.txt', rows.map(r => `[${r.at.toFixed(1)}s - ${r.end.toFixed(1)}s] ${r.text}`).join('\n') + '\n');
+    fs.writeFileSync(base + '.srt', rows.map((r, k) => `${k + 1}\n${ts(r.at)} --> ${ts(r.end)}\n${r.text}\n`).join('\n'));
   }
 
   if (framesAt) {
@@ -138,7 +145,7 @@ function tts(text, file) {
     const code = await new Promise(r => proc.on('close', r));
     if (code !== 0) { console.error('\nffmpeg gagal'); process.exit(1); }
     console.log(`\nSelesai: ${out} (${total.toFixed(1)} detik, ${fps} fps${clips.length ? `, voiceover ${clips.length} klip, ${voice}` : ''})`);
-    if (clips.length) console.log(`Naskah: ${base}-narasi.txt  Subtitle: ${base}.srt`);
+    console.log(`Naskah VO: ${base}-narasi.txt  Subtitle: ${base}.srt`);
   }
   if (errors.length) { console.error('Error di halaman:\n' + errors.join('\n')); process.exitCode = 2; }
   await browser.close();

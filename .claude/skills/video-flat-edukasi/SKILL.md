@@ -90,9 +90,10 @@ Satu scene sebaiknya bersuara ≤ 12 kata (± 3 detik), karena tempo cepat adala
 Outro tidak bersuara kecuali diberi `vo`.
 
 Jika edge-tts gagal (tidak ada internet atau host diblokir), skrip berhenti dengan pesan jelas.
-Jangan diam-diam membuat video tanpa suara: beri tahu pengguna, render `--no-vo` sebagai
-cadangan, dan serahkan `-narasi.txt` serta perintah render agar mereka bisa menjalankannya di
-komputer sendiri. Pengguna yang punya rekaman suara sendiri bisa memakai `--audio rekaman.mp3`
+Jangan diam-diam membuat video tanpa suara: beri tahu pengguna, lalu render `--no-vo` sebagai
+cadangan. Mode ini tetap menulis `-narasi.txt` dan `.srt` dengan rentang detik tiap kalimat
+(`[3.5s - 6.1s] ...`) sesuai timeline video, sehingga pengguna bisa merekam atau men-dub sendiri.
+Sertakan juga perintah render agar mereka bisa membuat versi bersuara di komputer sendiri. Pengguna yang punya rekaman suara sendiri bisa memakai `--audio rekaman.mp3`
 (durasi scene tidak diubah).
 
 ## Kebutuhan
