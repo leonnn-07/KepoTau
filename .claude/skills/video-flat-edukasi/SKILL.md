@@ -22,6 +22,19 @@ konsisten dan cepat dibuat.
 - **Akun**: brand **KepoTau**, handle **@kepotau.ofc** (TikTok & Instagram). Sudah menjadi default
   di template, jadi tidak perlu ditanyakan. Ubah `CONFIG.handle` hanya jika pengguna meminta.
 
+## Tampilan (sudah otomatis di template)
+
+- **Branding**: logo resmi KepoTau (maskot + tulisan, dari `public/brand`) kecil di atas setiap
+  scene, tanpa bingkai, dan watermark @kepotau.ofc di kanan bawah. Jangan menambah badge/bingkai
+  berwarna untuk brand.
+- **Latar hidup**: gradien bertema yang berganti tiap 5 scene (`CONFIG.bgThemes`, `CONFIG.bgEvery`)
+  dengan crossfade, pola titik halus yang bergeser, dan cahaya blur yang bergerak pelan. Pilih tema
+  per bagian cerita bila perlu dengan `bg: "ocean"` di scene. Tema yang tersedia: navy, ocean,
+  teal, grape, berry, sunset. Cocokkan dengan suasana: ocean/teal untuk air dan alam, sunset untuk
+  panas/api, berry/grape untuk twist/kejutan.
+- **Transisi caption**: caption lama naik dan memudar dalam ±0,16 dtk, baru caption baru masuk
+  (teks kecil lalu KATA KUNCI), jadi teks tidak pernah bertumpuk. Ilustrasi saling crossfade.
+
 Kalau pengguna hanya memberi topik, tulis naskahnya sendiri dengan struktur di bawah. Tampilkan
 naskah itu dalam tabel singkat di jawaban akhir supaya mudah direvisi, tapi jangan berhenti untuk
 meminta persetujuan; langsung buat videonya.

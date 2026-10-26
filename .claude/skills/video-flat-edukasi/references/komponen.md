@@ -12,6 +12,7 @@ jadi jangan taruh art di atas y ≈ 580.
   big: "KATA KUNCI",      // huruf besar, otomatis mengecil agar muat satu baris
   color: "yellow",        // warna kata kunci: yellow|purple|mint|blue|red|orange|white|pink|green atau hex
   ground: "dry",          // opsional, timpa CONFIG.ground: "normal"|"dry"|"wet"|false
+  bg: "ocean",            // opsional: tema latar scene ini (navy|ocean|teal|grape|berry|sunset)
   rain: "light",          // opsional: hujan di seluruh layar, "light"|"heavy"
   cta: "tulis di komentar", // opsional: tombol putih di bawah
   bigSize: 110,           // opsional: ukuran awal kata kunci
