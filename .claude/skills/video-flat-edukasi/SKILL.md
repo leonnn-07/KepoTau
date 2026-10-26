@@ -19,8 +19,8 @@ konsisten dan cepat dibuat.
   2. apalagi hujan pertama | SETELAH KEMARAU | matahari terik, tanah retak
   ```
   (teks kecil | KATA KUNCI | ide visual). Kolom visual boleh kosong; kamu yang merancang.
-- **Handle akun** (opsional). Brand selalu **KepoTau** (badge atas dan logo outro). Handle default
-  `@namaakun`; tanyakan sekali jika belum diketahui, lalu gunakan terus.
+- **Akun**: brand **KepoTau**, handle **@kepotau.ofc** (TikTok & Instagram). Sudah menjadi default
+  di template, jadi tidak perlu ditanyakan. Ubah `CONFIG.handle` hanya jika pengguna meminta.
 
 Kalau pengguna hanya memberi topik, tulis naskahnya sendiri dengan struktur di bawah. Tampilkan
 naskah itu dalam tabel singkat di jawaban akhir supaya mudah direvisi, tapi jangan berhenti untuk
