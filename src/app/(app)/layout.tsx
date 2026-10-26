@@ -10,8 +10,8 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
   return (
     <div className="mx-auto flex min-h-dvh max-w-[90rem]">
       <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col gap-8 p-5 lg:flex">
-        <Link href="/videos" className="focus-ring rounded-lg px-2 pt-1">
-          <Logo />
+        <Link href="/videos" className="focus-ring rounded-lg px-1 pt-1">
+          <Logo className="h-12 w-auto" />
         </Link>
         <SideNav />
         <div className="mt-auto">
@@ -24,7 +24,7 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="glass-strong sticky top-0 z-30 flex items-center justify-between border-x-0 border-t-0 px-4 py-3 lg:hidden">
           <Link href="/videos" className="focus-ring rounded-lg">
-            <Logo />
+            <Logo className="h-9 w-auto" />
           </Link>
           <form action={signOut}>
             <button type="submit" className="btn btn-ghost btn-sm" aria-label="Sign out">

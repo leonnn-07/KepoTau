@@ -10,8 +10,8 @@ export default function LoginPage({ searchParams }: PageProps<"/login">) {
   return (
     <main className="grid min-h-dvh place-items-center px-4 py-10">
       <div className="w-full max-w-sm animate-fade-up">
-        <div className="mb-8 flex justify-center">
-          <Logo />
+        <div className="mb-6 flex justify-center">
+          <Logo variant="stacked" className="size-56" />
         </div>
         <div className="glass p-6 sm:p-8">
           <h1 className="text-xl font-semibold tracking-tight">Welcome back</h1>
