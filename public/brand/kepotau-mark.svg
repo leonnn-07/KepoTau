@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300"><title>KepoTau</title><g transform="translate(0 0) scale(1.00000)"><g fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M46 296 C54 254 84 236 120 230" stroke="#E6EAF2" stroke-width="7"/>
+  <path d="M128 212 L126 232 M168 214 L170 230" stroke="#E6EAF2" stroke-width="7"/>
+  <path d="M150 56 C206 54 236 96 232 146 C228 194 196 222 148 222 C100 222 70 192 68 144 C66 100 94 62 144 57" stroke="#E6EAF2" stroke-width="7"/>
+  <path d="M70 134 C54 128 48 150 58 162 C62 168 68 168 72 166" stroke="#E6EAF2" stroke-width="6"/>
+  <path d="M100 74 C102 54 118 42 132 40 M130 60 C134 40 152 30 170 32 M164 60 C174 44 192 44 204 52" stroke="#E6EAF2" stroke-width="6"/>
+  <path d="M80 106 C92 94 108 94 118 100 C126 88 142 84 156 90" stroke="#E6EAF2" stroke-width="5"/>
+  <path d="M94 116 C102 108 114 106 124 110" stroke="#E6EAF2" stroke-width="5.5"/>
+  <ellipse cx="110" cy="136" rx="10" ry="12" stroke="#E6EAF2" stroke-width="5"/>
+  <circle cx="114" cy="133" r="4.5" fill="#E6EAF2" stroke="none"/>
+  <path d="M138 142 C134 154 132 162 140 166 C144 168 148 166 150 164" stroke="#E6EAF2" stroke-width="5"/>
+  <ellipse cx="128" cy="190" rx="8" ry="9.5" stroke="#E6EAF2" stroke-width="5"/>
+  <path d="M84 166 l9 -4 M90 174 l9 -4" stroke="#F5B21B" stroke-width="3.5" opacity=".75"/>
+  <ellipse cx="182" cy="134" rx="21" ry="24" stroke="#E6EAF2" stroke-width="5.5"/>
+  <circle cx="188" cy="128" r="10" fill="#E6EAF2" stroke="none"/>
+  <circle cx="192" cy="124" r="3.2" fill="#1F1B4A" stroke="none"/>
+  <path d="M160 100 C172 92 190 92 202 98" stroke="#E6EAF2" stroke-width="5"/>
+  <circle cx="182" cy="134" r="44" stroke="#F5B21B" stroke-width="9"/>
+  <path d="M154 108 C160 100 168 96 176 95" stroke="#FFFFFF" stroke-width="4" opacity=".55"/>
+  <path d="M214 166 L224 180" stroke="#F5B21B" stroke-width="15"/>
+  <!-- forearm -->
+  <path d="M228 244 C236 262 244 280 248 298 M262 236 C272 254 280 276 284 298" stroke="#E6EAF2" stroke-width="7"/>
+  <!-- fist -->
+  <path d="M222 206 C222 194 236 188 248 194 L262 204 C272 212 272 230 262 238 C252 246 236 248 226 240 C216 232 216 216 222 206 Z" stroke="#E6EAF2" stroke-width="6.5"/>
+  <path d="M232 202 C238 208 238 216 232 222 M244 206 C250 212 250 222 244 228 M256 214 C260 220 258 228 252 234" stroke="#E6EAF2" stroke-width="4.5"/>
+  <path d="M222 214 C214 212 208 218 212 226 C214 230 220 230 224 228" stroke="#E6EAF2" stroke-width="5"/>
+  <path d="M30 72 C30 54 52 48 60 60 C68 72 52 78 48 88 L48 96" stroke="#F5B21B" stroke-width="7"/>
+  <circle cx="48" cy="112" r="4.5" fill="#F5B21B" stroke="none"/>
+</g>
+</g></svg>
