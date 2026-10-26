@@ -9,6 +9,7 @@
  *     --vo-dir folder/            pakai file suara jadi per scene: vo-01.mp3, vo-02.mp3, ... (mis. hasil
  *                                 unduhan dari situs TTS di browser); durasi scene tetap disesuaikan
  *     --music lagu.mp3            musik latar (otomatis di-loop & dikecilkan)
+ *     --sfx-vol 0.5               volume sound effect (0 = mati); --no-sfx juga mematikan
  *     --audio narasi.mp3          pakai rekaman suara sendiri (tanpa TTS, durasi scene tidak diubah)
  *     --no-vo                     video tanpa suara
  *     --fps 30
@@ -42,6 +43,8 @@ const voDir = opt('--vo-dir');
 const listVO = flag('--list-vo');
 const rate = opt('--rate', '+10%');
 const music = opt('--music');
+const sfxVol = flag('--no-sfx') ? 0 : +opt('--sfx-vol', 0.5);
+const SFX_DIR = path.join(__dirname, '..', 'assets', 'sfx');
 const ownAudio = opt('--audio');
 const preview = opt('--preview');
 const framesAt = opt('--frames');
@@ -162,12 +165,31 @@ function tts(text, file) {
     if (r.status !== 0) process.exit(1);
     console.log(`Preview: ${preview} (${scenes.length} scene, total ${total.toFixed(1)} detik)`);
   } else {
-    // ---- susun audio: klip VO di posisi masing-masing (+ musik) ----
+    // ---- track sound effect: tiap event dari engine ditaruh di detiknya ----
+    let sfxTrack = null;
+    if (sfxVol > 0) {
+      const ev = (await page.evaluate(() => window.__sfxEvents ? window.__sfxEvents() : []))
+        .filter(e => fs.existsSync(path.join(SFX_DIR, e.s + '.wav')));
+      if (ev.length) {
+        sfxTrack = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'vfe-sfx-')), 'sfx.wav');
+        const a = ['-v', 'error', '-y'];
+        ev.forEach(e => a.push('-i', path.join(SFX_DIR, e.s + '.wav')));
+        const fc = ev.map((e, k) => `[${k}:a]volume=${e.v ?? 1},adelay=${Math.round(e.t * 1000)}:all=1[s${k}]`).join(';')
+          + ';' + ev.map((_, k) => `[s${k}]`).join('') + `amix=inputs=${ev.length}:normalize=0:duration=longest,apad,atrim=0:${total.toFixed(3)}[o]`;
+        a.push('-filter_complex', fc, '-map', '[o]', '-ar', '44100', sfxTrack);
+        const r = sh('ffmpeg', a);
+        if (r.status !== 0) { console.warn('Peringatan: gagal membuat track SFX, lanjut tanpa SFX.\n' + r.stderr); sfxTrack = null; }
+        else console.log(`Sound effect: ${ev.length} event`);
+      }
+    }
+
+    // ---- susun audio: klip VO di posisi masing-masing (+ SFX + musik) ----
     const ain = [], parts = [];
     let n = 1;
+    if (sfxTrack) { ain.push('-i', sfxTrack); parts.push(`[${n}:a]volume=${sfxVol}[v${n}]`); n++; }
     clips.forEach(c => { ain.push('-i', c.f); parts.push(`[${n}:a]adelay=${Math.round(c.at * 1000)}:all=1[v${n}]`); n++; });
     if (ownAudio) { ain.push('-i', ownAudio); parts.push(`[${n}:a]anull[v${n}]`); n++; }
-    if (music) { ain.push('-stream_loop', '-1', '-i', music); parts.push(`[${n}:a]volume=${clips.length || ownAudio ? 0.12 : 0.6},afade=t=out:st=${Math.max(0, total - 2)}:d=2[v${n}]`); n++; }
+    if (music) { ain.push('-stream_loop', '-1', '-i', music); parts.push(`[${n}:a]volume=${clips.length || ownAudio ? 0.12 : 0.35},afade=t=out:st=${Math.max(0, total - 2)}:d=2[v${n}]`); n++; }
     const ff = ['-v', 'error', '-y', '-f', 'image2pipe', '-vcodec', 'mjpeg', '-framerate', String(fps), '-i', '-', ...ain];
     if (n > 1) {
       const labels = Array.from({ length: n - 1 }, (_, k) => `[v${k + 1}]`).join('');

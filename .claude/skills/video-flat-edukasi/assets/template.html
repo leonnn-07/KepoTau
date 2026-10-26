@@ -137,6 +137,8 @@ let _seed = 7;
 const rnd = () => { _seed = (_seed * 16807) % 2147483647; return (_seed - 1) / 2147483646; };
 let _uid = 0;
 
+/** SFX(nama, isi): paksa sound effect tertentu saat isi muncul (pop pop2 whoosh swish ding buzz boing rise sparkle). */
+function SFX(name, inner){ return `<g data-sfx="${name}">${inner}</g>`; }
 /** A(kelas, delay, isi): bungkus elemen dengan animasi masuk/berulang. */
 function A(cls, d, inner, extra=''){ return `<g class="${cls}" style="--d:${d||0}s;${extra}">${inner}</g>`; }
 
@@ -197,10 +199,10 @@ const C = {
   /** Kartu (undangan, catatan, kutipan). opt {title, subtitle, lines[]} */
   card(x,y,w,h,o={}){ const L=(o.lines||[]).map((t,i)=>`<text x="${-w/2+70}" y="${-h/2+235+i*58}" font-family="Poppins" font-weight="500" font-size="38" fill="${INK}">${esc(t)}</text>`).join('');
     return `<g transform="translate(${x} ${y}) rotate(-2)"><rect x="${-w/2}" y="${-h/2}" width="${w}" height="${h}" rx="26" fill="#FFF7E0" stroke="${INK}" stroke-width="6"/><rect x="${-w/2+22}" y="${-h/2+22}" width="${w-44}" height="${h-44}" rx="16" fill="none" stroke="#E5A93B" stroke-width="4" stroke-dasharray="18 12"/><text y="${-h/2+110}" text-anchor="middle" font-family="Poppins" font-weight="900" font-size="72" fill="${INK}">${esc(o.title||'')}</text><text y="${-h/2+165}" text-anchor="middle" font-family="Poppins" font-weight="800" font-size="40" fill="#C2701E">${esc(o.subtitle||'')}</text>${L}</g>`; },
-  qmark(x,y,s=1,color='yellow'){ return `<g transform="translate(${x} ${y}) scale(${s})"><g class="bob"><text text-anchor="middle" dominant-baseline="middle" font-family="Poppins" font-weight="900" font-size="200" fill="${col(color)}" stroke="${INK}" stroke-width="5">?</text></g></g>`; },
-  check(x,y,s=1){ return `<g transform="translate(${x} ${y}) scale(${s})"><circle r="60" fill="#6EE7B7" stroke="${INK}" stroke-width="5"/><path d="M-28 2 L-6 24 L30 -22" fill="none" stroke="${INK}" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></g>`; },
-  cross(x,y,s=1){ return `<g transform="translate(${x} ${y}) scale(${s})"><circle r="60" fill="#F87171" stroke="${INK}" stroke-width="5"/><path d="M-24 -24 L24 24 M24 -24 L-24 24" stroke="${INK}" stroke-width="12" stroke-linecap="round"/></g>`; },
-  sparkle(x,y,s=1){ let o='';[[0,0,1],[60,-50,.7],[-50,60,.6],[70,60,.5]].forEach((p,i)=>{o+=`<g transform="translate(${p[0]} ${p[1]}) scale(${p[2]})"><g class="pulse" style="--d:-${i*.3}s"><path d="M0 -30 L8 -8 L30 0 L8 8 L0 30 L-8 8 L-30 0 L-8 -8Z" fill="#FDE68A"/></g></g>`;}); return `<g transform="translate(${x} ${y}) scale(${s})">${o}</g>`; },
+  qmark(x,y,s=1,color='yellow'){ return `<g data-sfx="boing" transform="translate(${x} ${y}) scale(${s})"><g class="bob"><text text-anchor="middle" dominant-baseline="middle" font-family="Poppins" font-weight="900" font-size="200" fill="${col(color)}" stroke="${INK}" stroke-width="5">?</text></g></g>`; },
+  check(x,y,s=1){ return `<g data-sfx="ding" transform="translate(${x} ${y}) scale(${s})"><circle r="60" fill="#6EE7B7" stroke="${INK}" stroke-width="5"/><path d="M-28 2 L-6 24 L30 -22" fill="none" stroke="${INK}" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></g>`; },
+  cross(x,y,s=1){ return `<g data-sfx="buzz" transform="translate(${x} ${y}) scale(${s})"><circle r="60" fill="#F87171" stroke="${INK}" stroke-width="5"/><path d="M-24 -24 L24 24 M24 -24 L-24 24" stroke="${INK}" stroke-width="12" stroke-linecap="round"/></g>`; },
+  sparkle(x,y,s=1){ let o='';[[0,0,1],[60,-50,.7],[-50,60,.6],[70,60,.5]].forEach((p,i)=>{o+=`<g transform="translate(${p[0]} ${p[1]}) scale(${p[2]})"><g class="pulse" style="--d:-${i*.3}s"><path d="M0 -30 L8 -8 L30 0 L8 8 L0 30 L-8 8 L-30 0 L-8 -8Z" fill="#FDE68A"/></g></g>`;}); return `<g data-sfx="sparkle" transform="translate(${x} ${y}) scale(${s})">${o}</g>`; },
   /** Panah putus-putus. */
   arrow(x1,y1,x2,y2,color='white'){ const c=col(color),a=Math.atan2(y2-y1,x2-x1),h=26; return `<g stroke="${c}" stroke-width="7" fill="none" stroke-linecap="round"><path class="flow" d="M${x1} ${y1} L${x2} ${y2}" stroke-dasharray="18 12"/><path d="M${x2-h*Math.cos(a-.5)} ${y2-h*Math.sin(a-.5)} L${x2} ${y2} L${x2-h*Math.cos(a+.5)} ${y2-h*Math.sin(a+.5)}"/></g>`; },
   /** Ikon sederhana: 'cup' | 'book' | 'glass' | 'bulb' | 'phone' | 'leaf' */
@@ -328,7 +330,35 @@ document.getElementById('play').onclick=play;
 addEventListener('keydown',e=>{ if(e.code==='Space'){e.preventDefault();playing?pause():play();} if(e.code==='ArrowRight'){pos=Math.min(TOTAL-.01,pos+2);render(pos);} if(e.code==='ArrowLeft'){pos=Math.max(0,pos-2);render(pos);} });
 stage.addEventListener('click',()=>playing?pause():play());
 
+/* ---------- sound effect otomatis (dibaca render.js) ---------- */
+const SFX_BY_CLASS = { pop:'pop2', grow:'pop2', slideL:'swish', slideR:'swish' };
+function sceneSfx(o){
+  const s=o.s; if(s.sfx===false) return [];
+  let ev=[];
+  if(s.type==='outro'){
+    const n=(s.socials||CONFIG.socials||[]).length;
+    ev.push({at:0,s:'whoosh'},{at:.9,s:'rise'},{at:2,s:'sparkle'}); for(let i=0;i<n;i++) ev.push({at:2+i*.25,s:'pop2'});
+  } else {
+    const prev=SCENES[o.i-1];
+    if(o.i>0 && !(prev&&prev.small===s.small)) ev.push({at:0,s:'whoosh'});
+    const el=buildScene(o);
+    el.querySelectorAll('.pop,.grow,.slideL,.slideR,.cta').forEach(n=>{
+      const at=parseFloat(n.style.getPropertyValue('--d'))||0;
+      const tag=n.closest('[data-sfx]')||n.querySelector('[data-sfx]');
+      const cls=Object.keys(SFX_BY_CLASS).find(c=>n.classList.contains(c));
+      ev.push({at, s: tag?tag.dataset.sfx : n.classList.contains('big')?'pop' : n.classList.contains('cta')?'pop2' : SFX_BY_CLASS[cls]});
+    });
+    el.remove();
+  }
+  if(Array.isArray(s.sfx)) ev=ev.concat(s.sfx);
+  ev.sort((a,b)=>a.at-b.at);
+  // buang yang terlalu rapat (< 0.1 dtk), maksimal 6 per scene agar tidak ramai
+  const outEv=[]; for(const e of ev){ if(e.at>=(o.end-o.start)) continue; const last=outEv.filter(x=>x.s!=='whoosh').pop(); if(e.s!=='whoosh'&&last&&e.at-last.at<.1) continue; outEv.push(e); }
+  return outEv.slice(0,6);
+}
+
 window.__TOTAL=TOTAL;
+window.__sfxEvents=()=>{ const all=TL.flatMap(o=>sceneSfx(o).map(e=>({t:+(o.start+e.at).toFixed(3),s:e.s,v:e.v}))); render(pos); return all; };
 window.__SCENES=TL.map(o=>({start:o.start,end:o.end,dur:o.end-o.start,big:o.s.big||o.s.type,vo:voText(o.s)}));
 window.__seek=t=>render(t);
 window.__ready=document.fonts.ready.then(()=>{ pos=Q.has('t')?+Q.get('t'):(Q.has('render')?0:1.2); render(pos); if(Q.has('autoplay')) play(); return TOTAL; });

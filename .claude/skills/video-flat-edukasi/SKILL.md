@@ -1,6 +1,6 @@
 ---
 name: video-flat-edukasi
-description: Membuat video animasi edukasi pendek vertikal 9:16 (TikTok/Reels/Shorts) bergaya flat vector untuk brand "KepoTau" — latar navy, teks kecil + KATA KUNCI besar berwarna, ilustrasi flat (tanah, awan, bakteri, wajah profil, molekul, label pil), animasi pop/fade cepat per scene, ditutup outro logo KepoTau yang terisi warna. Inputnya topik + naskah per scene; outputnya MP4 1080x1920 lengkap dengan voiceover bahasa Indonesia otomatis (ElevenLabs / edge-tts / situs TTS via browser) yang sinkron per scene, plus file HTML sumber dan subtitle. Gunakan skill ini setiap kali pengguna minta dibuatkan video edukasi/explainer/fakta unik/sains singkat, konten "kenapa ...?", animasi motion graphic untuk TikTok/Reels, atau menyebut video-flat-edukasi / KepoTau — walaupun pengguna hanya memberi topik tanpa naskah.
+description: Membuat video animasi edukasi pendek vertikal 9:16 (TikTok/Reels/Shorts) bergaya flat vector untuk brand "KepoTau" — latar navy, teks kecil + KATA KUNCI besar berwarna, ilustrasi flat (tanah, awan, bakteri, wajah profil, molekul, label pil), animasi pop/fade cepat per scene, ditutup outro logo KepoTau yang terisi warna. Inputnya topik + naskah per scene; outputnya MP4 1080x1920 lengkap dengan sound effect otomatis + voiceover bahasa Indonesia otomatis (ElevenLabs / edge-tts / situs TTS via browser) yang sinkron per scene, plus musik latar opsional, file HTML sumber, dan subtitle. Gunakan skill ini setiap kali pengguna minta dibuatkan video edukasi/explainer/fakta unik/sains singkat, konten "kenapa ...?", animasi motion graphic untuk TikTok/Reels, atau menyebut video-flat-edukasi / KepoTau — walaupun pengguna hanya memberi topik tanpa naskah.
 ---
 
 # Video Flat Edukasi
@@ -132,6 +132,35 @@ jadi durasi scene, `-narasi.txt`, dan `.srt` selalu sinkron dengan suara aslinya
 Pengguna yang punya rekaman utuh sendiri bisa memakai `--audio rekaman.mp3` (durasi scene tidak
 diubah); yang punya rekaman per kalimat sebaiknya memakai `--vo-dir`.
 
+## Sound effect & musik
+
+Audio akhir terdiri dari tiga lapis: **VO** (paling depan) + **SFX** (volume 0.5) + **musik latar**
+(opsional, volume 0.12 bila ada VO, otomatis di-loop dan fade-out di akhir).
+
+SFX dipasang **otomatis** oleh render.js berdasarkan animasi, jadi biasanya tidak perlu diatur:
+- `whoosh` saat pergantian scene (dilewati jika teks kecilnya sama dengan scene sebelumnya);
+- `pop` saat KATA KUNCI muncul, `pop2` untuk objek `A('pop')`/`grow` dan tombol CTA,
+  `swish` untuk `slideL`/`slideR`;
+- `ding` untuk `C.check`, `buzz` untuk `C.cross`, `boing` untuk `C.qmark`, `sparkle` untuk
+  `C.sparkle`;
+- outro: `whoosh` → `rise` saat logo terisi → `sparkle` + `pop2` per baris akun.
+
+Maksimal 6 SFX per scene, dan bunyi yang jaraknya < 0.1 dtk dibuang supaya tidak ramai. Pengaturan
+manual hanya jika perlu:
+- `SFX('ding', isi)` di art: paksa bunyi tertentu saat isi muncul (pakai untuk fakta/angka penting,
+  `buzz` untuk "MITOS", `boing` untuk momen lucu);
+- `sfx: [{at: 1.2, s: 'ding', v: 0.8}]` di scene: tambah bunyi pada detik tertentu;
+- `sfx: false` di scene: scene tanpa SFX.
+
+Bunyi yang tersedia di `assets/sfx/`: pop, pop2, whoosh, swish, ding, buzz, boing, rise, sparkle
+(disintesis dengan `scripts/make_sfx.sh`, bebas lisensi). Untuk mengganti karakter bunyi, timpa
+file .wav dengan nama yang sama.
+
+Musik latar: jika pengguna memberi file, render dengan `--music <file>`. Jika tidak, sarankan
+musik bebas royalti bertempo santai (lo-fi / ukulele ceria) dari YouTube Audio Library atau
+Pixabay Music; jangan mengunduh musik berhak cipta. Opsi: `--sfx-vol 0.3` untuk SFX lebih pelan,
+`--no-sfx` untuk mematikannya.
+
 ## Kebutuhan
 
 Node, `playwright` (Chromium), `ffmpeg`, dan salah satu sumber suara di atas. Jika tidak tersedia,
@@ -140,8 +169,8 @@ serahkan file HTML-nya saja: pengguna bisa membukanya di Chrome (klik PUTAR atau
 
 ## Hasil akhir untuk pengguna
 
-- `<slug>.mp4`: video final 1080x1920, 30 fps, dengan voiceover (dan musik jika diberikan)
+- `<slug>.mp4`: video final 1080x1920, 30 fps, dengan VO + sound effect (+ musik jika diberikan)
 - `<slug>.html`: sumber animasi, bisa diedit lalu dirender ulang
 - `<slug>-narasi.txt` dan `<slug>.srt`: naskah bertimestamp dan subtitle
 - Tabel naskah singkat di chat (no | teks layar | voiceover | detik), plus saran musik/SFX
-  (lo-fi pelan, bunyi "pop" setiap kata kunci muncul)
+  (sebutkan bahwa SFX sudah otomatis; tawarkan `--music` bila belum ada musik)

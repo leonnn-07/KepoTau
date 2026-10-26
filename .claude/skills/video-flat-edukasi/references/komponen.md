@@ -16,6 +16,7 @@ jadi jangan taruh art di atas y ≈ 580.
   cta: "tulis di komentar", // opsional: tombol putih di bawah
   bigSize: 110,           // opsional: ukuran awal kata kunci
   vo: "teks untuk dibacakan", // opsional: voiceover; default = small + big; "" = tanpa suara
+  sfx: [{at:1.2, s:"ding"}],  // opsional: SFX tambahan (detik dalam scene); false = scene tanpa SFX
   art: C => A('pop',.3, C.sun(760,760)) + C.sprout(300,G,true) }
 { type: "outro", dur: 3.5 }   // penutup: logo KepoTau outline → terisi cairan (Kepo putih, Tau kuning) + 2 baris akun berikon TikTok & Instagram (CONFIG.socials)
 ```
@@ -36,6 +37,9 @@ Untuk menggabungkan animasi masuk dengan animasi berulang, bungkus berlapis:
 `A('pop',.3, A('bob',0, C.drop(540,900)))`.
 
 Untuk objek yang "berjalan masuk": `A('walk',.2, isi, '--from:500px;--dur:2s')`.
+
+Sound effect mengikuti animasi masuk secara otomatis (lihat SKILL.md). Untuk memaksa bunyi
+tertentu: `A('pop',.6, SFX('ding', C.chip(540,1300,'FAKTA','mint')))`.
 
 ## Komponen `C.*`
 
