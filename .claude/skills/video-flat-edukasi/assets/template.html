@@ -24,9 +24,9 @@ html,body{height:100%;background:#0b0a1a;overflow:hidden;font-family:Poppins,sys
 .outro{background:var(--bg)}
 .outro svg{position:absolute;inset:0;width:1080px;height:1920px}
 .outro .tag{position:absolute;left:0;right:0;top:1080px;text-align:center;color:#F8FAFC;font-weight:500;font-size:50px}
-.outro .plat{position:absolute;left:0;right:0;top:1340px;text-align:center;color:#CBD5E1;font-weight:600;font-size:38px}
-.outro .sw{position:absolute;left:0;right:0;top:1200px;display:flex;justify-content:center}
-.outro .search{display:flex;align-items:center;gap:24px;background:#fff;color:#333;font-weight:600;font-size:46px;padding:26px 60px;border-radius:24px;white-space:nowrap}
+.outro .socials{position:absolute;left:0;right:0;top:1170px;display:flex;flex-direction:column;align-items:center;gap:34px}
+.outro .soc{display:flex;align-items:center;gap:28px;color:#F8FAFC;font-weight:700;font-size:56px;white-space:nowrap}
+.outro .soc svg{position:static;width:92px;height:92px;flex:none}
 /* outro: logo tergambar (outline) lalu terisi cairan dari bawah */
 .draw{stroke-dasharray:1400;animation:draw 1.1s ease-in-out both}
 .fillup{animation:fillup 1.3s cubic-bezier(.45,0,.2,1) both;animation-delay:var(--d,1s)}
@@ -87,8 +87,11 @@ const CONFIG = {
   brand: "KepoTau",       // teks badge atas & logo outro
   brandSplit: 4,          // logo outro dua warna: 4 huruf pertama putih ("Kepo"), sisanya kuning ("Tau")
   tagline: "",            // opsional: teks kecil di bawah logo outro
-  handle: "@kepotau.ofc", // watermark & kolom pencarian outro
-  platforms: "TikTok & Instagram", // teks kecil di bawah kolom pencarian outro ("" = sembunyikan)
+  handle: "@kepotau.ofc", // watermark kanan bawah tiap scene
+  socials: [              // baris akun di outro (ikon + handle); kosongkan [] untuk menyembunyikan
+    { icon: "tiktok", handle: "@kepotau.ofc" },
+    { icon: "instagram", handle: "@kepotau.ofc" },
+  ],
   ground: "normal",       // default tanah: "normal" | "dry" | "wet" | false
 };
 
@@ -252,6 +255,13 @@ const C = {
   phone(x,y,s=1,inner=''){ const id='ph'+(++_uid); return `<g transform="translate(${x} ${y}) scale(${s})"><rect x="-175" y="-310" width="350" height="620" rx="44" fill="#334155" stroke="${INK}" stroke-width="6"/><clipPath id="${id}"><rect x="-150" y="-265" width="300" height="530" rx="16"/></clipPath><rect x="-150" y="-265" width="300" height="530" rx="16" fill="#7DD3FC"/><g clip-path="url(#${id})">${inner}</g><rect x="-40" y="-292" width="80" height="12" rx="6" fill="${INK}"/></g>`; },
 };
 
+/* ---------- ikon sosial media untuk outro (viewBox 0 0 100 100) ---------- */
+const TT_NOTE='M52 14 H66 C67 25 74 32 85 33 V47 C77 47 71 45 66 41 V64 A22 22 0 1 1 44 42 V57 A8 8 0 1 0 52 64Z';
+const SOCIAL_ICONS = {
+  tiktok: `<svg viewBox="0 0 100 100"><rect width="100" height="100" rx="24" fill="#000"/><path d="${TT_NOTE}" fill="#25F4EE" transform="translate(-3 -3)"/><path d="${TT_NOTE}" fill="#FE2C55" transform="translate(3 3)"/><path d="${TT_NOTE}" fill="#fff"/></svg>`,
+  instagram: `<svg viewBox="0 0 100 100"><defs><linearGradient id="igg" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#FEDA75"/><stop offset=".35" stop-color="#FA7E1E"/><stop offset=".6" stop-color="#D62976"/><stop offset="1" stop-color="#4F5BD5"/></linearGradient></defs><rect width="100" height="100" rx="24" fill="url(#igg)"/><rect x="22" y="22" width="56" height="56" rx="17" fill="none" stroke="#fff" stroke-width="7"/><circle cx="50" cy="50" r="13" fill="none" stroke="#fff" stroke-width="7"/><circle cx="66" cy="34" r="4.5" fill="#fff"/></svg>`,
+};
+
 /* ---------- timeline ---------- */
 let acc = 0;
 // window.__DURS (diisi render.js saat voiceover) menimpa durasi agar pas dengan panjang suara
@@ -276,8 +286,7 @@ function buildScene(o){
       ${liquid(id+'a','#F8FAFC','#CBD5E1')}${liquid(id+'b','#FBBF24','#F59E0B')}
       ${word.replace('<text','<text class="draw" fill="none" stroke="#F8FAFC" stroke-width="5" stroke-linejoin="round"')}<tspan>${esc(b.slice(0,k))}</tspan><tspan stroke="#FBBF24">${esc(b.slice(k))}</tspan></text></svg>
       ${(s.tagline??CONFIG.tagline)?`<div class="tag rise" style="--d:1.8s">${esc(s.tagline??CONFIG.tagline)}</div>`:''}
-      <div class="sw" style="${(s.tagline??CONFIG.tagline)?'top:1290px':''}"><div class="search rise" style="--d:2s">🔍 ${esc(s.handle||CONFIG.handle)}</div></div>
-      ${CONFIG.platforms?`<div class="plat rise" style="--d:2.3s;${(s.tagline??CONFIG.tagline)?'top:1430px':''}">${esc(CONFIG.platforms)}</div>`:''}`;
+      <div class="socials" style="${(s.tagline??CONFIG.tagline)?'top:1260px':''}">${(s.socials||CONFIG.socials||[]).map((a,i)=>`<div class="soc rise" style="--d:${2+i*.25}s">${SOCIAL_ICONS[a.icon]||''}<span>${esc(a.handle)}</span></div>`).join('')}</div>`;
   } else {
     const prev=SCENES[o.i-1]; const same=prev&&prev.type!=='outro'&&prev.small===s.small;
     const gt = s.ground===undefined ? CONFIG.ground : s.ground;

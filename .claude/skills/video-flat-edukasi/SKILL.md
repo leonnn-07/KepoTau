@@ -42,7 +42,8 @@ kalimat yang dipotong menjadi **teks kecil (pengantar) + KATA KUNCI (1–4 kata)
 7. **CTA** (1 scene): pertanyaan ke penonton + `cta: "tulis di komentar"`.
 8. **Outro branding** (selalu, scene terakhir): `{ type: "outro", dur: 3.5 }`. Tulisan **KepoTau**
    muncul sebagai garis luar yang tergambar, lalu terisi seperti cairan naik ("Kepo" putih,
-   "Tau" kuning), disusul kolom pencarian @handle. `CONFIG.tagline` menambahkan teks kecil di
+   "Tau" kuning), disusul dua baris akun: ikon TikTok + @kepotau.ofc dan ikon Instagram
+   + @kepotau.ofc (`CONFIG.socials`). `CONFIG.tagline` menambahkan teks kecil di
    bawah logo bila pengguna mau. Outro tidak bersuara kecuali diberi `vo`.
 
 Target 18–30 scene, 50–90 detik. Bahasa Indonesia santai, huruf kecil di teks pengantar.
