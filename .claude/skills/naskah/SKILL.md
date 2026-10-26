@@ -33,9 +33,15 @@ Buat **10 ide**, bernomor, dalam tabel:
   umum ("Tentang obeng").
 - **Hook**: kalimat pertama video, maksimal 10 kata, berupa pertanyaan, fakta mengejutkan, atau
   situasi relatable. Contoh: "kenapa obeng nggak pernah bengkok walau diputer kenceng?"
-- **Gaya**: `flat` (video-flat-edukasi: konsep, sains, kimia, tubuh, fakta unik, perbandingan) atau
-  `3d` (video-3d-diorama: proses fisik/pabrik bertahap, mesin, bangunan, bawah tanah, evolusi
-  teknologi dari zaman dulu ke sekarang).
+- **Gaya** (aturan pemilik channel):
+  - `3d` (video-3d-diorama) untuk hal yang **berwujud dan bisa dimaketkan**: tempat/bangunan
+    (bendungan, terowongan, tambang, kota), **cara kerja mesin/alat**, proses pabrik bertahap,
+    sistem di bawah tanah, evolusi teknologi dari zaman dulu ke sekarang.
+  - `flat` (video-flat-edukasi) untuk hal yang **abstrak**: teori, sifat benda/zat, hukum fisika,
+    reaksi kimia, cara kerja tubuh, fenomena alam sehari-hari, fakta unik, mitos vs fakta,
+    perbandingan.
+  - Penentunya: kalau inti videonya "menunjukkan benda/tempat dan bagian-bagiannya bergerak" →
+    `3d`; kalau "menjelaskan kenapa sesuatu terjadi atau bersifat begitu" → `flat`.
 - **Kenapa menarik**: unsur kejutan atau kedekatan dengan penonton, dalam satu frasa.
 
 Variasikan sudut pandang dalam satu daftar: proses ("gimana dibuat"), alasan ("kenapa"), sejarah
