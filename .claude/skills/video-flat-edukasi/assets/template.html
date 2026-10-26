@@ -21,9 +21,17 @@ html,body{height:100%;background:#0b0a1a;overflow:hidden;font-family:Poppins,sys
 .big{font-weight:900;font-size:128px;line-height:1.08;text-transform:uppercase;white-space:nowrap;margin-top:6px;letter-spacing:-1px}
 .ctaw{position:absolute;left:0;right:0;bottom:150px;display:flex;justify-content:center;z-index:3}
 .cta{background:#F8FAFC;color:var(--ink);font-weight:700;font-size:44px;padding:30px 90px;border-radius:999px;z-index:3;white-space:nowrap}
-.outro{background:#12111C;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:60px}
-.outro .logo{font-weight:900;font-size:150px;color:#fff;animation:glitch 1.2s steps(2) infinite both}
-.outro .search{display:flex;align-items:center;gap:24px;background:#fff;color:#333;font-weight:600;font-size:46px;padding:26px 60px;border-radius:24px;box-shadow:-8px 0 0 #25F4EE,8px 0 0 #FE2C55}
+.outro{background:var(--bg)}
+.outro svg{position:absolute;inset:0;width:1080px;height:1920px}
+.outro .tag{position:absolute;left:0;right:0;top:1080px;text-align:center;color:#F8FAFC;font-weight:500;font-size:50px}
+.outro .search{position:absolute;left:50%;top:1200px;transform:translateX(-50%);display:flex;align-items:center;gap:24px;background:#fff;color:#333;font-weight:600;font-size:46px;padding:26px 60px;border-radius:24px;white-space:nowrap}
+/* outro: logo tergambar (outline) lalu terisi cairan dari bawah */
+.draw{stroke-dasharray:1400;animation:draw 1.1s ease-in-out both}
+.fillup{animation:fillup 1.3s cubic-bezier(.45,0,.2,1) both;animation-delay:var(--d,1s)}
+.wave{animation:wave 1.2s linear infinite}
+@keyframes draw{from{stroke-dashoffset:1400}to{stroke-dashoffset:0}}
+@keyframes fillup{from{transform:translateY(160px)}to{transform:translateY(-220px)}}
+@keyframes wave{from{transform:translateX(0)}to{transform:translateX(-240px)}}
 #play{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:20;font:800 28px Poppins,sans-serif;padding:22px 48px;border-radius:999px;border:0;background:#FBBF24;color:#16132E;cursor:pointer}
 #bar{position:fixed;left:0;bottom:0;height:5px;background:#FBBF24;z-index:20;width:0}
 body.render #play,body.render #bar{display:none}
@@ -74,7 +82,9 @@ body.render #play,body.render #bar{display:none}
    Koordinat art: kanvas 1080 x 1920. Tanah mulai di y = G (1520).
    ===================================================================== */
 const CONFIG = {
-  brand: "GEGARA",        // teks badge atas & logo outro
+  brand: "KepoTau",       // teks badge atas & logo outro
+  brandSplit: 4,          // logo outro dua warna: 4 huruf pertama putih ("Kepo"), sisanya kuning ("Tau")
+  tagline: "",            // opsional: teks kecil di bawah logo outro
   handle: "@namaakun",    // watermark & kolom pencarian outro
   ground: "normal",       // default tanah: "normal" | "dry" | "wet" | false
 };
@@ -85,7 +95,7 @@ const SCENES = [
             + A('slideL',.4, C.face(260,1150,1.2)) + A('fade',.9, C.smell(420,1180,620,1510)) },
   { dur: 3, small: "apalagi hujan pertama", big: "SETELAH KEMARAU", color: "yellow", ground: "dry",
     art: C => A('pop',.3, C.sun(760,760)) + C.sprout(300,G,true) + C.sprout(820,G,true) },
-  { dur: 3, small: "gegaranya...", big: "BAKTERI", color: "purple",
+  { dur: 3, small: "ternyata gara-garanya...", big: "BAKTERI", color: "purple",
     art: C => A('pop',.3, C.magnifier(540,1050,230, C.colony(540,1050,1.1), {bg:'#6B4423'}))
             + A('rise',.7, C.pill(540,1360,'bakteri tanah','purple')) },
   { dur: 3, small: "bakteri di tanah membuat", big: "GEOSMIN", color: "mint",
@@ -106,7 +116,7 @@ const SCENES = [
     art: C => A('pop',.2, C.cloud(220,1050,.8)) + A('pop',.35, C.icon('cup',540,1050)) + A('pop',.5, C.icon('book',860,1050))
             + C.pill(220,1230,'hujan','white') + C.pill(540,1230,'kopi','white') + C.pill(860,1230,'buku baru','white')
             + A('pop',.8, C.qmark(540,1420)) },
-  { type: "outro", dur: 2.5 },
+  { type: "outro", dur: 3.5 },
 ];
 
 /* =====================================================================
@@ -253,7 +263,17 @@ function buildScene(o){
   const s=o.s, el=document.createElement('div'); el.className='scene'; _seed=97+o.i*13; _uid=o.i*1000;
   if(s.type==='outro'){
     el.classList.add('outro');
-    el.innerHTML=`<div class="logo pop">${esc(s.brand||CONFIG.brand)}</div><div class="search rise" style="--d:.3s">🔍 ${esc(s.handle||CONFIG.handle)}</div>`;
+    const b=s.brand||CONFIG.brand, k=CONFIG.brandSplit??b.length, id='lg'+o.i;
+    const word=`<text x="540" y="900" text-anchor="middle" font-family="Poppins,sans-serif" font-weight="900" font-size="${Math.min(200,1500/b.length)}" letter-spacing="-4">`;
+    let wave='M-240 0'; for(let x=-240;x<1320;x+=120) wave+=` Q${x+60} -26 ${x+120} 0`; wave+=' V400 H-240Z';
+    const mask=(m,a,c)=>`<mask id="${m}" maskUnits="userSpaceOnUse" x="0" y="0" width="1080" height="1920">${word}<tspan fill="${a}">${esc(b.slice(0,k))}</tspan><tspan fill="${c}">${esc(b.slice(k))}</tspan></text></mask>`;
+    const liquid=(m,c1,c2)=>`<g mask="url(#${m})"><g class="fillup" style="--d:.9s"><g transform="translate(0 860)"><g class="wave"><path d="${wave}" fill="${c1}"/></g></g>
+        <g transform="translate(0 874)"><g class="wave" style="animation-duration:1.7s"><path d="${wave}" fill="${c2}" opacity=".6" transform="translate(-60 0)"/></g></g></g></g>`;
+    el.innerHTML=`<svg viewBox="0 0 1080 1920"><defs>${mask(id+'a','#fff','#000')}${mask(id+'b','#000','#fff')}</defs>
+      ${liquid(id+'a','#F8FAFC','#CBD5E1')}${liquid(id+'b','#FBBF24','#F59E0B')}
+      ${word.replace('<text','<text class="draw" fill="none" stroke="#F8FAFC" stroke-width="5" stroke-linejoin="round"')}<tspan>${esc(b.slice(0,k))}</tspan><tspan stroke="#FBBF24">${esc(b.slice(k))}</tspan></text></svg>
+      ${(s.tagline??CONFIG.tagline)?`<div class="tag rise" style="--d:1.8s">${esc(s.tagline??CONFIG.tagline)}</div>`:''}
+      <div class="search rise" style="--d:2s;${(s.tagline??CONFIG.tagline)?'top:1290px':''}">🔍 ${esc(s.handle||CONFIG.handle)}</div>`;
   } else {
     const prev=SCENES[o.i-1]; const same=prev&&prev.type!=='outro'&&prev.small===s.small;
     const gt = s.ground===undefined ? CONFIG.ground : s.ground;

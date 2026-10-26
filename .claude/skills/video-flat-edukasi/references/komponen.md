@@ -17,7 +17,7 @@ jadi jangan taruh art di atas y ≈ 580.
   bigSize: 110,           // opsional: ukuran awal kata kunci
   vo: "teks untuk dibacakan", // opsional: voiceover; default = small + big; "" = tanpa suara
   art: C => A('pop',.3, C.sun(760,760)) + C.sprout(300,G,true) }
-{ type: "outro", dur: 2.5 }   // layar penutup: brand + kolom cari @handle
+{ type: "outro", dur: 3.5 }   // penutup: logo KepoTau outline → terisi cairan (Kepo putih, Tau kuning) + kolom cari @handle
 ```
 
 `art` mengembalikan **string SVG**. Gabungkan komponen dengan `+`. Urutan = urutan tumpukan

@@ -1,6 +1,6 @@
 ---
 name: video-flat-edukasi
-description: Membuat video animasi edukasi pendek vertikal 9:16 (TikTok/Reels/Shorts) bergaya flat vector ala akun sains "GEGARA" — latar navy, teks kecil + KATA KUNCI besar berwarna, ilustrasi flat (tanah, awan, bakteri, wajah profil, molekul, label pil), animasi pop/fade cepat per scene. Inputnya topik + naskah per scene; outputnya MP4 1080x1920 lengkap dengan voiceover bahasa Indonesia otomatis (ElevenLabs / edge-tts / situs TTS via browser) yang sinkron per scene, plus file HTML sumber dan subtitle. Gunakan skill ini setiap kali pengguna minta dibuatkan video edukasi/explainer/fakta unik/sains singkat, konten "kenapa ...?", animasi motion graphic untuk TikTok/Reels, atau menyebut video-flat-edukasi / gaya GEGARA — walaupun pengguna hanya memberi topik tanpa naskah.
+description: Membuat video animasi edukasi pendek vertikal 9:16 (TikTok/Reels/Shorts) bergaya flat vector untuk brand "KepoTau" — latar navy, teks kecil + KATA KUNCI besar berwarna, ilustrasi flat (tanah, awan, bakteri, wajah profil, molekul, label pil), animasi pop/fade cepat per scene, ditutup outro logo KepoTau yang terisi warna. Inputnya topik + naskah per scene; outputnya MP4 1080x1920 lengkap dengan voiceover bahasa Indonesia otomatis (ElevenLabs / edge-tts / situs TTS via browser) yang sinkron per scene, plus file HTML sumber dan subtitle. Gunakan skill ini setiap kali pengguna minta dibuatkan video edukasi/explainer/fakta unik/sains singkat, konten "kenapa ...?", animasi motion graphic untuk TikTok/Reels, atau menyebut video-flat-edukasi / KepoTau — walaupun pengguna hanya memberi topik tanpa naskah.
 ---
 
 # Video Flat Edukasi
@@ -19,8 +19,8 @@ konsisten dan cepat dibuat.
   2. apalagi hujan pertama | SETELAH KEMARAU | matahari terik, tanah retak
   ```
   (teks kecil | KATA KUNCI | ide visual). Kolom visual boleh kosong; kamu yang merancang.
-- **Brand & handle** (opsional). Default `GEGARA` dan `@namaakun`. Tanyakan sekali jika belum
-  jelas, lalu gunakan terus untuk seri yang sama.
+- **Handle akun** (opsional). Brand selalu **KepoTau** (badge atas dan logo outro). Handle default
+  `@namaakun`; tanyakan sekali jika belum diketahui, lalu gunakan terus.
 
 Kalau pengguna hanya memberi topik, tulis naskahnya sendiri dengan struktur di bawah. Tampilkan
 naskah itu dalam tabel singkat di jawaban akhir supaya mudah direvisi, tapi jangan berhenti untuk
@@ -32,14 +32,18 @@ Video gaya ini terasa seperti teman yang bercerita cepat. Setiap scene berisi sa
 kalimat yang dipotong menjadi **teks kecil (pengantar) + KATA KUNCI (1–4 kata)**.
 
 1. **Hook** (1–2 scene): pertanyaan relatable. "Kenapa bau hujan / ENAK BANGET?"
-2. **Penyebab** (3–6 scene): "gegaranya... / BAKTERI". Kata "gegaranya..." adalah ciri khas seri.
+2. **Penyebab** (3–6 scene): "ternyata gara-garanya... / BAKTERI".
 3. **Fakta wow** (2–4 scene): angka atau perbandingan yang bisa divisualkan
    ("cuma 5 tetes" di "kolam renang olimpiade").
 4. **Mekanisme** (4–8 scene): proses langkah demi langkah, tiap langkah satu visual.
 5. **Twist** (2–4 scene): "terus, buat apa...?" lalu jawaban yang mengejutkan, dengan sumber
    singkat ("penelitian / TAHUN 2020" + `C.paper`).
 6. **Kesimpulan lucu** (1–2 scene): "jadi, X itu sebenarnya / ANALOGI SEHARI-HARI".
-7. **CTA** (1 scene): pertanyaan ke penonton + `cta: "tulis di komentar"`, lalu `{type:"outro"}`.
+7. **CTA** (1 scene): pertanyaan ke penonton + `cta: "tulis di komentar"`.
+8. **Outro branding** (selalu, scene terakhir): `{ type: "outro", dur: 3.5 }`. Tulisan **KepoTau**
+   muncul sebagai garis luar yang tergambar, lalu terisi seperti cairan naik ("Kepo" putih,
+   "Tau" kuning), disusul kolom pencarian @handle. `CONFIG.tagline` menambahkan teks kecil di
+   bawah logo bila pengguna mau. Outro tidak bersuara kecuali diberi `vo`.
 
 Target 18–30 scene, 50–90 detik. Bahasa Indonesia santai, huruf kecil di teks pengantar.
 Pakai fakta yang benar; kalau tidak yakin dengan angka atau sumber, pakai kata "sekitar" atau
