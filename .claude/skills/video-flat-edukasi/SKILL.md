@@ -65,6 +65,8 @@ diam, sementara elemen baru muncul.
    **lihat gambar pratinjaunya**. Perbaiki teks yang bertumpuk, objek yang keluar layar, art yang
    menutupi caption (y < 580), atau scene kosong. Jika skrip melaporkan "Error di halaman",
    perbaiki scene yang disebut. Pratinjau memakai durasi `dur`, tanpa suara.
+   Tile pratinjau kecil (270 px); untuk memeriksa teks kecil di dalam art, ambil screenshot ukuran
+   penuh: `render.js <file>.html --frames 11.5,40` (detik, dipisah koma).
 7. Render MP4 final dengan voiceover: `node <skill>/scripts/render.js <file>.html <file>.mp4`
    (opsi: `--voice id-ID-ArdiNeural` untuk suara pria, `--rate +15%`, `--music lagu.mp3`).
    Skrip membuat suara tiap scene dengan edge-tts, memperpanjang scene yang suaranya lebih panjang

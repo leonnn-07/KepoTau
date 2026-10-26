@@ -10,6 +10,7 @@
  *     --no-vo                     video tanpa suara
  *     --fps 30
  *   node render.js video.html --preview preview.png      # lembar kontak 1 frame per scene
+ *   node render.js video.html --frames 11.5,67           # screenshot ukuran penuh di detik tertentu
  *
  * Voiceover: teks tiap scene (field `vo`, default teks kecil + kata kunci) diubah jadi suara
  * dengan edge-tts per scene, lalu durasi scene otomatis diperpanjang agar pas dengan suaranya.
@@ -35,8 +36,9 @@ const rate = opt('--rate', '+10%');
 const music = opt('--music');
 const ownAudio = opt('--audio');
 const preview = opt('--preview');
-const useVO = !preview && !ownAudio && !flag('--no-vo');
-const out = preview ? null : (args[1] && !args[1].startsWith('--') ? args[1] : input.replace(/\.html?$/, '') + '.mp4');
+const framesAt = opt('--frames');
+const useVO = !preview && !framesAt && !ownAudio && !flag('--no-vo');
+const out = (preview || framesAt) ? null : (args[1] && !args[1].startsWith('--') ? args[1] : input.replace(/\.html?$/, '') + '.mp4');
 const base = (out || input).replace(/\.(mp4|html?)$/, '');
 const LEAD = 0.25, TAIL = 0.45; // jeda sebelum & sesudah suara di tiap scene
 
@@ -66,6 +68,8 @@ function tts(text, file) {
   await page.goto(url);
   let total = await page.evaluate(() => window.__ready);
   let scenes = await page.evaluate(() => window.__SCENES);
+  if (!(await page.evaluate(() => document.fonts.check('900 40px Poppins'))))
+    console.warn('Peringatan: font Poppins gagal dimuat (offline?) — teks memakai font cadangan.');
 
   // ---- voiceover per scene ----
   let clips = [];
@@ -90,7 +94,12 @@ function tts(text, file) {
     fs.writeFileSync(base + '.srt', clips.map((c, k) => `${k + 1}\n${ts(c.at)} --> ${ts(c.at + c.d)}\n${c.text}\n`).join('\n'));
   }
 
-  if (preview) {
+  if (framesAt) {
+    for (const t of framesAt.split(',').map(Number)) {
+      await page.evaluate(t => window.__seek(t), t);
+      const f = `${base}-t${t}.png`; await page.screenshot({ path: f }); console.log(f);
+    }
+  } else if (preview) {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vfe-'));
     for (let i = 0; i < scenes.length; i++) {
       const s = scenes[i], t = Math.min(s.end - 0.05, s.start + Math.max(1.4, (s.end - s.start) * 0.7));

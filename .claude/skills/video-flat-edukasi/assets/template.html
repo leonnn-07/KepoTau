@@ -196,6 +196,47 @@ const C = {
     phone:`<rect x="-55" y="-100" width="110" height="200" rx="18" fill="#334155" ${S}/><rect x="-42" y="-80" width="84" height="150" rx="6" fill="#7DD3FC"/>`,
     leaf:`<path d="M0 60 C-70 20 -60 -60 0 -80 C60 -60 70 20 0 60Z" fill="#9BC26B" ${S}/><path d="M0 60 V-60" stroke="${INK}" stroke-width="4"/>`};
     return `<g transform="translate(${x} ${y}) scale(${s})">${I[name]||''}</g>`; },
+  /** Orang tampak depan (kepala + bahu). mood: 'calm'|'happy'|'yawn'|'sleepy'|'alert'|'shock'|'sad'|'hold'|'look'. opt {shirt, hair} */
+  person(x,y,s=1,mood='calm',o={}){ const shirt=col(o.shirt||'blue'),hair=o.hair||'#2B2238',S=`stroke="${INK}" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"`; let eyes,mouth='';
+    if(['yawn','sleepy','hold','happy'].includes(mood)) eyes=mood==='happy'?`<path d="M-62 -4 Q-42 -24 -22 -4 M22 -4 Q42 -24 62 -4" fill="none" ${S}/>`:`<path d="M-62 -12 Q-42 4 -22 -12 M22 -12 Q42 4 62 -12" fill="none" ${S}/>`;
+    else if(mood==='alert'||mood==='shock') eyes=`<circle cx="-40" cy="-12" r="20" fill="#fff" ${S}/><circle cx="40" cy="-12" r="20" fill="#fff" ${S}/><circle cx="-40" cy="-10" r="9" fill="${INK}"/><circle cx="40" cy="-10" r="9" fill="${INK}"/>`;
+    else { const dx=mood==='look'?-8:0; eyes=`<circle cx="${-40+dx}" cy="-10" r="10" fill="${INK}"/><circle cx="${40+dx}" cy="-10" r="10" fill="${INK}"/>`; }
+    if(mood==='yawn') mouth=`<g class="pulse"><ellipse cx="0" cy="58" rx="32" ry="44" fill="#4A1D3A" ${S}/><ellipse cx="0" cy="82" rx="18" ry="12" fill="#F87171"/></g>`;
+    else if(mood==='shock') mouth=`<ellipse cx="0" cy="58" rx="20" ry="26" fill="#4A1D3A" ${S}/>`;
+    else if(mood==='sleepy') mouth=`<ellipse cx="0" cy="52" rx="14" ry="10" fill="#4A1D3A" ${S}/>`;
+    else if(mood==='sad') mouth=`<path d="M-24 62 Q0 42 24 62" fill="none" ${S}/>`;
+    else if(mood==='hold') mouth=`<path d="M-26 55 Q-13 45 0 55 Q13 65 26 55" fill="none" ${S}/><path d="M95 -60 C105 -40 112 -28 102 -20 A12 12 0 0 1 86 -32 C86 -42 92 -50 95 -60Z" fill="#7DD3FC" stroke="${INK}" stroke-width="3"/>`;
+    else if(mood==='happy') mouth=`<path d="M-30 44 Q0 84 30 44Z" fill="#4A1D3A" ${S}/>`;
+    else mouth=`<path d="M-22 50 Q0 66 22 50" fill="none" ${S}/>`;
+    return `<g transform="translate(${x} ${y}) scale(${s})"><path d="M-150 270 C-150 180 -95 150 0 150 C95 150 150 180 150 270Z" fill="${shirt}" ${S}/><rect x="-28" y="100" width="56" height="60" fill="#F2B98B" ${S}/>
+    <circle cx="-112" cy="10" r="24" fill="#F2B98B" ${S}/><circle cx="112" cy="10" r="24" fill="#F2B98B" ${S}/><circle r="115" fill="#F2B98B" ${S}/>
+    <path d="M-117 -5 C-125 -95 -60 -135 0 -135 C70 -135 125 -95 117 -5 C95 -60 40 -75 -10 -70 C-55 -66 -95 -45 -117 -5Z" fill="${hair}" ${S}/>
+    <ellipse cx="-70" cy="32" rx="16" ry="10" fill="#F4A6B8"/><ellipse cx="70" cy="32" rx="16" ry="10" fill="#F4A6B8"/>${eyes}${mouth}</g>`; },
+  /** Otak pink. */
+  brain(x,y,s=1,fill='#F9A8D4'){ const B=[[-70,-15,68],[-10,-50,72],[60,-35,66],[85,25,52],[-50,40,56],[20,40,60]];
+    return `<g transform="translate(${x} ${y}) scale(${s})"><rect x="-14" y="60" width="28" height="60" rx="12" fill="#E879A8" stroke="${INK}" stroke-width="5"/>${B.map(b=>`<circle cx="${b[0]}" cy="${b[1]}" r="${b[2]}" fill="${fill}" stroke="${INK}" stroke-width="10"/>`).join('')}${B.map(b=>`<circle cx="${b[0]}" cy="${b[1]}" r="${b[2]}" fill="${fill}"/>`).join('')}
+    <path d="M0 -110 C-15 -60 15 -20 0 30 C-10 60 0 80 0 90 M-110 0 C-80 -10 -60 10 -40 -5 M40 -70 C55 -40 85 -45 100 -60 M30 20 C60 5 90 20 120 10 M-70 60 C-50 45 -30 70 -10 60" fill="none" stroke="#DB5F9A" stroke-width="7" stroke-linecap="round"/></g>`; },
+  /** Mata besar. */
+  eye(x,y,s=1){ return `<g transform="translate(${x} ${y}) scale(${s})"><path d="M-90 0 Q0 -80 90 0 Q0 80 -90 0Z" fill="#F8FAFC" stroke="${INK}" stroke-width="6" stroke-linejoin="round"/><circle r="36" fill="#7DD3FC" stroke="${INK}" stroke-width="5"/><circle r="16" fill="${INK}"/><circle cx="-10" cy="-12" r="7" fill="#fff"/></g>`; },
+  /** Anjing tampak depan. mood 'calm'|'yawn' */
+  dog(x,y,s=1,mood='calm'){ const S=`stroke="${INK}" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"`, yw=mood==='yawn';
+    return `<g transform="translate(${x} ${y}) scale(${s})"><ellipse cx="0" cy="210" rx="130" ry="90" fill="#D9A066" ${S}/><ellipse cx="-105" cy="-20" rx="40" ry="85" transform="rotate(20 -105 -20)" fill="#8B5A2B" ${S}/><ellipse cx="105" cy="-20" rx="40" ry="85" transform="rotate(-20 105 -20)" fill="#8B5A2B" ${S}/>
+    <ellipse cx="0" cy="10" rx="110" ry="115" fill="#D9A066" ${S}/><ellipse cx="0" cy="60" rx="60" ry="${yw?62:45}" fill="#F8FAFC" ${S}/>
+    ${yw?`<path d="M-45 -20 Q-30 -32 -15 -20 M15 -20 Q30 -32 45 -20" fill="none" ${S}/><g class="pulse"><ellipse cx="0" cy="80" rx="30" ry="34" fill="#4A1D3A" ${S}/><ellipse cx="0" cy="100" rx="16" ry="11" fill="#F87171"/></g>`:`<circle cx="-35" cy="-20" r="11" fill="${INK}"/><circle cx="35" cy="-20" r="11" fill="${INK}"/><path d="M-20 75 Q0 90 20 75" fill="none" ${S}/>`}
+    <ellipse cx="0" cy="${yw?30:40}" rx="24" ry="16" fill="${INK}"/></g>`; },
+  /** Termometer; level 0..1, isi naik dengan animasi grow. */
+  thermo(x,y,s=1,level=.85,color='red'){ const c=col(color); return `<g transform="translate(${x} ${y}) scale(${s})"><rect x="-26" y="-200" width="52" height="230" rx="26" fill="#F8FAFC" stroke="${INK}" stroke-width="5"/><circle cy="50" r="48" fill="${c}" stroke="${INK}" stroke-width="5"/>${A('grow',.5,`<rect x="-12" y="${30-210*level}" width="24" height="${210*level}" rx="12" fill="${c}"/>`)}</g>`; },
+  /** Zzz mengambang (ngantuk/tidur). */
+  zzz(x,y,s=1){ return `<g transform="translate(${x} ${y}) scale(${s})"><g class="bob">${C.text(0,0,'z',{size:60,color:'#C4B5FD',weight:900})}${C.text(45,-55,'z',{size:76,color:'#C4B5FD',weight:900})}${C.text(100,-125,'Z',{size:96,color:'#C4B5FD',weight:900})}</g></g>`; },
+  /** Kepingan salju (dingin). */
+  flake(x,y,s=1){ return `<g transform="translate(${x} ${y}) scale(${s})"><g class="spin" stroke="#BAE6FD" stroke-width="8" stroke-linecap="round">${[0,60,120].map(r=>`<path transform="rotate(${r})" d="M0 -40 V40 M-12 -28 L0 -40 L12 -28 M-12 28 L0 40 L12 28"/>`).join('')}</g></g>`; },
+  /** Gelembung chat/ucapan; lebar menyesuaikan teks. tail 'left'|'right' */
+  bubble(x,y,txt,color='white',tail='left',size=36){ const c=col(color),w=Math.max(160,txt.length*size*.6+70),t=tail==='right'?1:-1;
+    return `<g transform="translate(${x} ${y})"><path d="M${t*w*.2} 30 L${t*w*.3} 64 L${t*w*.38} 30Z" fill="${c}" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/><rect x="${-w/2}" y="-38" width="${w}" height="76" rx="30" fill="${c}" stroke="${INK}" stroke-width="4"/><path d="M${t*w*.2+4} 34 L${t*w*.38-4} 34" stroke="${c}" stroke-width="10"/><text y="4" text-anchor="middle" dominant-baseline="middle" font-family="Poppins" font-weight="800" font-size="${size}" fill="${INK}">${esc(txt)}</text></g>`; },
+  /** Satu batang grafik (tumbuh dari bawah) + label di bawah garis dasar `base`. */
+  bar(x,base,h,color,label,d=.3,w=130){ return A('grow',d,`<rect x="${x-w/2}" y="${base-h}" width="${w}" height="${h}" rx="18" fill="${col(color)}" stroke="${INK}" stroke-width="5"/>`)+(label?A('fade',d+.3,C.pill(x,base+50,label,'white',26)):''); },
+  /** Ponsel besar; inner digambar dengan koordinat lokal (0,0 = tengah layar, layar ±150 x ±260). */
+  phone(x,y,s=1,inner=''){ const id='ph'+(++_uid); return `<g transform="translate(${x} ${y}) scale(${s})"><rect x="-175" y="-310" width="350" height="620" rx="44" fill="#334155" stroke="${INK}" stroke-width="6"/><clipPath id="${id}"><rect x="-150" y="-265" width="300" height="530" rx="16"/></clipPath><rect x="-150" y="-265" width="300" height="530" rx="16" fill="#7DD3FC"/><g clip-path="url(#${id})">${inner}</g><rect x="-40" y="-292" width="80" height="12" rx="6" fill="${INK}"/></g>`; },
 };
 
 /* ---------- timeline ---------- */

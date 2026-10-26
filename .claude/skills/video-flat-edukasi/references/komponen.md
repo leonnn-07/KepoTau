@@ -47,7 +47,7 @@ Untuk objek yang "berjalan masuk": `A('walk',.2, isi, '--from:500px;--dur:2s')`.
 | `rain(kind, box?)` | hujan; `box={x,y,w,h}` untuk membatasi area (mis. di dalam panel) |
 | `ground(type)` | tanah (biasanya otomatis) |
 | `sprout(x,y=G,wilt)` | tunas tanaman; `wilt=true` = layu kekuningan |
-| `face(x,y,s,dir)` | kepala manusia profil; `dir=1` menghadap kanan, `-1` kiri. Hidung ±150·s dari x |
+| `face(x,y,s,dir)` | kepala manusia profil samping (untuk adegan menghirup/melihat); `dir=1` menghadap kanan, `-1` kiri. Hidung ±150·s dari x |
 | `smell(x1,y1,x2,y2,color,amp)` | dua garis putus-putus berliuk dan mengalir (bau, aliran, sinyal, gelombang) |
 | `bacterium(x,y,rot,s,fill)` | satu bakteri kapsul berwajah |
 | `colony(x,y,s,fill)` | gerombolan 6 bakteri bergoyang (lebar ≈ 260·s) |
@@ -66,6 +66,15 @@ Untuk objek yang "berjalan masuk": `A('walk',.2, isi, '--from:500px;--dur:2s')`.
 | `sparkle(x,y,s)` | kilauan |
 | `arrow(x1,y1,x2,y2,color)` | panah putus-putus mengalir |
 | `icon(name,x,y,s)` | `cup` `book` `glass` `bulb` `phone` `leaf` |
+| `person(x,y,s,mood,{shirt,hair})` | orang tampak depan (kepala+bahu, tinggi ≈ 400·s). mood: `calm` `happy` `yawn` `sleepy` `alert` `shock` `sad` `hold` `look` |
+| `brain(x,y,s,fill)` | otak pink |
+| `eye(x,y,s)` | mata besar |
+| `dog(x,y,s,mood)` | anjing tampak depan, `calm`/`yawn` |
+| `thermo(x,y,s,level,color)` | termometer, isi 0..1 naik beranimasi |
+| `zzz(x,y,s)` / `flake(x,y,s)` | ngantuk / dingin |
+| `bubble(x,y,txt,color,tail,size)` | gelembung chat; lebar otomatis; `tail` `left`/`right` |
+| `bar(x,base,h,color,label,delay,w)` | batang grafik tumbuh dari garis dasar `base` (+ label) |
+| `phone(x,y,s,inner)` | ponsel besar; `inner` berkoordinat lokal (layar ±150 × ±260), mis. isi `C.bubble(...)` |
 
 ## Menggambar objek baru (custom SVG)
 
@@ -88,3 +97,9 @@ const bug=(x,y,s=1)=>`<g transform="translate(${x} ${y}) scale(${s})" stroke="#1
  <circle cx="12" cy="-8" r="6" fill="#16132E"/><path d="M20 -30 C40 -80 70 -90 90 -95 M5 -32 C15 -80 40 -100 60 -110" fill="none"/></g>`;
 ```
 Fungsi helper seperti ini boleh ditaruh di atas `const SCENES`.
+
+## Gerakan khusus
+
+Kalau butuh gerakan yang tidak ada di daftar kelas (mis. mulut membuka-menutup, objek melompat),
+tambahkan `<style>@keyframes nama{...} .nama{animation:nama 1s infinite}</style>` di dalam string
+`art`. CSS di dalam SVG ikut berlaku, dan engine tetap bisa mengontrol waktunya untuk render.
