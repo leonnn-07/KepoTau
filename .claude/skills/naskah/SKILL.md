@@ -1,6 +1,6 @@
 ---
 name: naskah
-description: Generator ide dan naskah video edukasi pendek KepoTau (TikTok/Reels/Shorts) dari sebuah kategori atau topik. Dipanggil dengan "/naskah <kategori atau topik>", misalnya "/naskah chemical", "/naskah proses pembuatan alat perkakas", "/naskah proses pembuatan airbag mobil". Jika inputnya kategori luas, berikan daftar ide topik bernomor untuk dipilih; jika topiknya sudah spesifik (atau pengguna memilih nomor), tulis naskah lengkap siap pakai untuk skill video-flat-edukasi atau video-3d-diorama, plus judul, caption, dan hashtag. Gunakan juga setiap kali pengguna minta ide konten, list topik, "bikinin naskah/script", brainstorming konten edukasi, atau bertanya "enaknya bikin video tentang apa" untuk KepoTau.
+description: Generator ide dan naskah video edukasi pendek KepoTau (TikTok/Reels/Shorts) dari sebuah kategori atau topik. Dipanggil dengan "/naskah [kategori atau topik]", misalnya "/naskah chemical", "/naskah proses pembuatan alat perkakas", "/naskah proses pembuatan airbag mobil". Jika inputnya kategori luas, berikan daftar ide topik bernomor untuk dipilih; jika topiknya sudah spesifik (atau pengguna memilih nomor), tulis naskah lengkap siap pakai untuk skill video-flat-edukasi atau video-3d-diorama, plus judul, caption, dan hashtag. Gunakan juga setiap kali pengguna minta ide konten, list topik, "bikinin naskah/script", brainstorming konten edukasi, atau bertanya "enaknya bikin video tentang apa" untuk KepoTau.
 ---
 
 # Naskah KepoTau
