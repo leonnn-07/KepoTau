@@ -20,15 +20,15 @@ const SHOTS = [ { say, vo?, cam, add?, remove?, minDur?, sfx? }, ..., { type: "o
 | `cam` | preset `{ focus, dist, angle, pitch, move, amount, fov, shake }` (lihat **Kamera**), atau bebas `{ pos, look, to:{pos,look,fov}, fov }` |
 | `trans` | transisi masuk ke shot ini: `cut` (default), `whip`, `fly`, `zoom` (lihat **Transisi**) |
 | `add` | `K => [ ...objek ]`: objek baru yang muncul di shot ini. Bungkus dengan `A()` untuk animasi |
-| `remove` | `['id', ...]`: objek ber-id yang hilang mulai shot ini |
-| `minDur` | durasi minimum (dtk) bila animasi butuh waktu lebih lama dari VO |
+| `remove` | `['id', ...]`: objek ber-id yang hilang mulai shot ini (berlaku juga untuk objek WORLD yang diberi `userData.id`) |
+| `minDur` | durasi minimum (dtk) bila animasi butuh waktu lebih lama dari kalimatnya (berlaku dengan dan tanpa VO) |
 | `sfx` | `[{at, s, v}]` SFX tambahan; `false` = tanpa SFX |
 
 Tanpa VO, durasi shot = jumlah kata / 2.6 + 0.9 dtk (atau `dur`). Dengan VO, durasi = panjang suara + 0.7 dtk.
 
 ### Animasi muncul: `A(objek, anim, delay, sfx?)`
 
-`anim`: `rise` (naik dari bawah tanah, cocok untuk bangunan/mesin), `drop` (jatuh memantul, cocok untuk
+`anim`: `dig` (tanah berkurang dari atas = menggali; pakai pada `K.plug`), `rise` (naik dari bawah tanah, cocok untuk bangunan/mesin), `drop` (jatuh memantul, cocok untuk
 rumah/papan), `pop` (membesar), `grow` (pipa memanjang dari titik awal, air/lapisan mengisi dari bawah),
 `fade`, `none`. `delay` dalam detik sejak shot dimulai (biasanya 0.2–1.0, harus < durasi VO).
 Argumen ke-4 (opsional): `'year'` (bunyi *ding* untuk papan tahun), nama SFX (`clunk`, `splash`,
@@ -48,6 +48,8 @@ grow lainnya → `swish`.
 | `forest({count, rMin, rMax, cutZ})` | pepohonan latar melingkar |
 | `tree(pos, s)` / `rock(pos, s)` / `fence(a, b)` | pohon low-poly, batu, pagar kayu dari titik a ke b |
 | `water(pos, [w,h,d], {color, opacity})` | air (kotak transparan). Keruh `#8a7a5c`/`#B79A72`, bersih `#5aa3c8` |
+| `plug({x, z, depth})` | sumbat tanah seukuran sebuah cut. Lubang yang baru akan digali: buat cut di `ground`, taruh `plug` di WORLD (lubang tertutup), lalu di shot penggalian `A(K.plug(...), 'dig', .2)` (set `userData.digDur`). Atau beri plug WORLD sebuah id dan `remove` |
+| `aquifer({x:[a,b], top, h, z, color})` | lapisan air tanah biru di muka depan penampang (`z` = z1 tanah) |
 
 **Bangunan & mesin**
 
@@ -55,8 +57,12 @@ grow lainnya → `swish`.
 |---|---|
 | `waterWheel(pos, {r, width, speed})` | kincir air kayu berputar terus |
 | `tower(pos, {h, w, tank})` | menara kayu + tangki logam (otomatis ada papan KepoTau kecil) |
-| `pipe([[x,y,z], ...], {r, color})` | pipa lurus antar titik; `grow` = memanjang |
-| `pump(pos, {h})` | pompa piston naik-turun |
+| `pipe([[x,y,z], ...], {r, color, opacity})` | pipa lurus antar titik; `grow` = memanjang; `opacity` < 1 untuk pipa bening (isi pipa terlihat) |
+| `pump(pos, {h})` | piston sederhana naik-turun |
+| `handPump(pos)` | pompa tangan (dragon) dengan tuas bergerak |
+| `electricPump(pos)` | pompa air listrik di atas pondasi beton |
+| `toren(pos, {h, color})` | toren air plastik di menara besi (+ papan KepoTau) |
+| `person(pos, {pose, rot, color, s})` | figur orang sederhana (tokoh "kamu"); pose `stand`, `walk`, `work` (lengan bergerak) |
 | `house(pos, {w,d,h,wall,roof})` | rumah dinding gelap + atap genteng |
 | `tank(pos, {w,d,h})` | bak beton cutaway (dinding depan terbuka) |
 | `layers(pos, [w,d], [{h,color}, ...])` | lapisan bertumpuk dari bawah (kerikil, pasir, tanah) |
@@ -69,7 +75,7 @@ grow lainnya → `swish`.
 |---|---|
 | `sign(pos, '1582', {w,h,rot})` | papan putih bertiang, untuk tahun/era/nama tempat |
 | `brandBoard(pos, rotY, scale)` | papan biru **KepoTau + @kepotau.ofc**; tempel di dinding/tangki (pos = tengah papan) |
-| `label(pos, text)` | label pil putih melayang (selalu menghadap kamera) |
+| `label(pos, text)` | label pil putih melayang (selalu menghadap kamera, terlihat menembus objek). Otomatis hilang di akhir shot tempat ia muncul; set `userData.keep = true` agar bertahan |
 
 **Partikel & primitif**
 
@@ -81,7 +87,7 @@ grow lainnya → `swish`.
 ## Objek baru (custom)
 
 Gunakan helper engine: `grp(pos, ...anak)`, `box(w,h,d, mat, pos)`, `cyl(rTop, rBot, h, mat, pos)`,
-`mesh(geo, mat, pos)`, material `M.std(color, {rough, metal, opacity, map})`, `M.wood()`, `M.metal(color)`,
+`mesh(geo, mat, pos)`, `canvasTex(w,h,draw)`, `speckle(...)`, `soilSideTex(h, grass, kedalamanAtas)`, `TEX` (cache), material `M.std(color, {rough, metal, opacity, map})`, `M.wood()`, `M.metal(color)`,
 tekstur `textTex(text, {...})`, `tileTex(color, grout)`, `concreteTex()`. Animasi berkelanjutan:
 `g.userData.update = (t, lt) => { ... }` (t = waktu global, lt = sejak muncul; harus fungsi waktu,
 jangan memakai Date/akumulasi, supaya render per frame konsisten).
@@ -89,6 +95,13 @@ jangan memakai Date/akumulasi, supaya render per frame konsisten).
 Aturan gaya: proporsi realistis (pintu ±2 m, ember ±0.5 m), warna natural agak pudar (kayu `#8a6a4a`,
 beton `#8d8a84`, logam `#b9c2cb`), material kasar (rough .8–.9) kecuali air/logam. Taruh bangunan di
 atas tanah dan mesin air di dasar parit, karena penonton membaca cerita dari penampang tanah.
+
+## Tata letak & kedalaman
+
+- `ground.depth` minimal 12–14 m, karena shot lebar dari atas akan memperlihatkan "void" berwarna langit
+  di bawah blok tanah yang dangkal. Untuk sumur bor/tambang, pakai 18–25 m.
+- Caption ada di ±60–66% tinggi layar. Preset kamera otomatis menaruh `focus` di ±42% dari atas
+  (`frameY`, bisa diubah 0.3–0.5), jadi cukup arahkan `focus` ke objek utamanya.
 
 ## Kamera
 
