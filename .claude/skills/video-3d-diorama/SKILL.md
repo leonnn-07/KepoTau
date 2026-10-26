@@ -1,6 +1,6 @@
 ---
 name: video-3d-diorama
-description: Membuat video edukasi vertikal 9:16 (TikTok/Reels/Shorts) bergaya 3D diorama potongan tanah (cutaway) untuk brand "KepoTau" — maket 3D realistis dengan penampang tanah berlapis, kamera bergerak pelan, objek dirakit satu per satu (kincir, pipa, menara, rumah, bak saringan), papan tahun/era, caption putih kata per kata, papan branding KepoTau di dalam adegan, dan outro logo KepoTau. Cocok untuk cerita "evolusi teknologi / gimana caranya ... di zaman dulu", cara kerja sistem (air bersih, sumur, irigasi, saluran, bendungan, pembangkit listrik, septic tank, tambang) dan proses bawah tanah. Input topik + naskah; output MP4 1080x1920 dengan voiceover Indonesia otomatis (ElevenLabs / edge-tts / situs TTS via browser), sound effect, ambience, musik opsional, plus subtitle. Gunakan skill ini setiap kali pengguna minta video 3D, diorama, cutaway/penampang, "kayak video simulasi 3D", evolusi/sejarah teknologi, atau menyebut video-3d-diorama — walaupun hanya memberi topik.
+description: Membuat video edukasi vertikal 9:16 (TikTok/Reels/Shorts) bergaya 3D diorama potongan tanah (cutaway) untuk brand "KepoTau" — maket 3D realistis dengan penampang tanah berlapis, kamera dinamis (zoom in/out, orbit, crane, reveal) dengan transisi whip pan antar area, objek dirakit satu per satu (kincir, pipa, menara, rumah, bak saringan), papan tahun/era, caption putih kata per kata, papan branding KepoTau di dalam adegan, dan outro logo KepoTau. Cocok untuk cerita "evolusi teknologi / gimana caranya ... di zaman dulu", cara kerja sistem (air bersih, sumur, irigasi, saluran, bendungan, pembangkit listrik, septic tank, tambang) dan proses bawah tanah. Input topik + naskah; output MP4 1080x1920 dengan voiceover Indonesia otomatis (ElevenLabs / edge-tts / situs TTS via browser), sound effect, ambience, musik opsional, plus subtitle. Gunakan skill ini setiap kali pengguna minta video 3D, diorama, cutaway/penampang, "kayak video simulasi 3D", evolusi/sejarah teknologi, atau menyebut video-3d-diorama — walaupun hanya memberi topik.
 ---
 
 # Video 3D Diorama (KepoTau)
@@ -14,6 +14,11 @@ merancang dunia 3D (`WORLD`) dan urutan shot (`SHOTS`).
 
 - **Diorama cutaway**: blok tanah dengan rumput di atas dan strata tanah terlihat di sisi depan; parit
   sungai atau galian memperlihatkan isinya dari samping. Padang rumput dan pohon di latar, langit biru pucat.
+- **Kamera hidup dan bervariasi**: tiap shot punya gerak berbeda (push/pull, zoom in/out, orbit,
+  crane, truck, reveal/dive), selang-seling dekat ↔ jauh dan rendah ↔ tinggi. Antar area yang
+  bersebelahan pakai transisi **whip** (kamera melesat cepat + motion blur + whoosh); sudut lain di
+  area sama pakai **fly**; penekanan pakai **zoom**; lokasi jauh pakai **cut**. Detail di
+  `references/prefab.md` bagian Kamera dan Transisi.
 - **Dirakit bertahap**: setiap kalimat menambah satu-dua objek (kincir naik dari tanah, pipa
   memanjang, rumah jatuh di tempat). Penonton melihat solusi tersusun langkah demi langkah.
 - **Narasi orang kedua, santai**: "kamu pasang kincir air", "buat naikin airnya", "tapi warnanya
@@ -50,8 +55,10 @@ dengan tahun atau angka, pakai "sekitar" atau era umum ("zaman dulu", "abad 19")
    `assets/three.min.js` (harus satu folder dengan HTML).
 2. Baca `references/prefab.md` (prefab `K.*`, animasi `A()`, kamera, aturan gaya).
 3. Ganti blok `WORLD` dan `SHOTS` (contoh "air bersih" di template dihapus). `CONFIG` biarkan.
-   Rancang dulu tata letaknya: area utama di x ≈ 0, area lain (dalam rumah, era berikutnya) di
-   x = 40, 70, ... Objek yang muncul belakangan masuk lewat `add` di shot-nya.
+   Rancang dulu tata letaknya: area-area yang berurutan dalam cerita dibuat **bersebelahan** di satu
+   `K.ground` (x ≈ 0, 26, 52, ...) agar bisa disambung dengan whip pan; lokasi dalam ruangan
+   ditaruh jauh (x ≥ 80). Objek yang muncul belakangan masuk lewat `add` di shot-nya. Tulis daftar
+   shot dengan kolom kamera (`move`) dan transisi (`trans`) dulu, lalu cek variasinya.
 4. Cek: `node <skill>/scripts/render.js <slug>.html --preview <slug>-preview.png` dan **lihat
    gambarnya**. Periksa: objek utama terlihat jelas dan tidak terpotong, kamera tidak menembus
    tanah/dinding, caption tidak menutupi objek penting (caption ada di y ≈ 60% layar), dan tidak ada

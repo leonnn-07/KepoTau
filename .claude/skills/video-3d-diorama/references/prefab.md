@@ -17,7 +17,8 @@ const SHOTS = [ { say, vo?, cam, add?, remove?, minDur?, sfx? }, ..., { type: "o
 |---|---|
 | `say` | kalimat narasi = caption kata per kata (gaya bicara santai, huruf kecil) |
 | `vo` | opsional: teks yang dibacakan TTS bila berbeda dari `say` (angka, singkatan) |
-| `cam` | `{ pos:[x,y,z], look:[x,y,z], to:{pos?,look?}, fov? }`: kamera bergerak pelan dari pos ke `to.pos` sepanjang shot (ease in-out). Antar shot = potongan (cut). |
+| `cam` | preset `{ focus, dist, angle, pitch, move, amount, fov, shake }` (lihat **Kamera**), atau bebas `{ pos, look, to:{pos,look,fov}, fov }` |
+| `trans` | transisi masuk ke shot ini: `cut` (default), `whip`, `fly`, `zoom` (lihat **Transisi**) |
 | `add` | `K => [ ...objek ]`: objek baru yang muncul di shot ini. Bungkus dengan `A()` untuk animasi |
 | `remove` | `['id', ...]`: objek ber-id yang hilang mulai shot ini |
 | `minDur` | durasi minimum (dtk) bila animasi butuh waktu lebih lama dari VO |
@@ -91,10 +92,55 @@ atas tanah dan mesin air di dasar parit, karena penonton membaca cerita dari pen
 
 ## Kamera
 
-Layar portrait (FOV 38°) membuat pandangan horizontal sempit, sekitar 0.4 × jarak. Untuk memperlihatkan
-objek selebar W meter, jarak kamera ≈ 2.5 × W. Pola yang enak:
-- **establishing**: tinggi 6–7 m, jarak 15–18 m, melihat ke pusat diorama;
-- **detail di parit/galian**: tinggi 0–2.5 m (sedikit di atas tanah), jarak 10–15 m, `look` ke y negatif;
-- gerak kecil (1–3 m) per shot dengan `to.pos`, jangan berputar jauh.
-Pindah ke area/lokasi lain (dalam rumah, era berikutnya) dengan membangunnya di x lain (mis. x = 40, 70)
-lalu arahkan kamera ke sana. Antar area cukup berjarak ±30 m agar tidak saling terlihat.
+Pakai **preset** supaya gerak kamera bervariasi tanpa menghitung koordinat:
+
+```js
+cam: { focus: [x, y, z], dist: 14, angle: 20, pitch: 22, move: 'push', amount: 1, fov: 38, shake: 0 }
+```
+
+- `focus`: titik yang disorot (objek utama shot itu).
+- `dist`: jarak kamera ke focus (m).
+- `angle`: arah datang dalam derajat; 0 = tepat dari depan (+z), positif = dari kanan, negatif = dari kiri. Jaga ±40 agar penampang tanah tetap terlihat.
+- `pitch`: sudut menunduk dalam derajat; 5–10 = setinggi tanah (dramatis), 20–30 = tiga-perempat, 40+ = dari atas.
+- `amount`: kekuatan gerak (0.5 halus, 1 normal, 1.5 kuat).
+- `shake`: 0..1, goyang tangan halus untuk momen tegang/lucu.
+
+| `move` | Efek | Pakai untuk |
+|---|---|---|
+| `push` / `pull` | kamera maju / mundur (dolly) | fokus ke objek baru / memperlihatkan konteks |
+| `zoomIn` / `zoomOut` | lensa zoom (FOV), posisi tetap | penekanan detail / "lihat sekelilingnya" |
+| `orbitL` / `orbitR` | memutari focus ±28° | memperlihatkan bentuk 3D objek |
+| `craneUp` / `craneDown` | kamera naik / turun sambil menengadah | objek tinggi (menara), turun ke galian |
+| `truckL` / `truckR` | geser ke samping sejajar | mengikuti pipa/aliran |
+| `reveal` | dekat & rendah → lebar & tinggi | pembuka / hasil akhir |
+| `dive` | tinggi & lebar → dekat & rendah | masuk ke detail bawah tanah |
+| `static` | diam | momen singkat |
+
+Kombinasi boleh dipakai: `move: ['zoomIn', 'orbitR'], amount: .6`.
+
+Aturan variasi: jangan memakai `move` atau `angle` yang sama dua shot berturut-turut. Selang-seling
+dekat ↔ jauh (dist 7–10 ↔ 16–22) dan rendah ↔ tinggi (pitch 6–12 ↔ 22–30). Shot pembuka biasanya
+`reveal`, shot detail `zoomIn`/`dive`, shot objek tinggi `craneUp`, shot pipa/aliran `truckL/R`.
+
+Layar portrait membuat pandangan horizontal sempit (± 0.4 × jarak dengan FOV 38). Untuk memperlihatkan
+objek selebar W meter, `dist` ≈ 2.5 × W. Jangan biarkan kamera berada di bawah tanah atau di dalam
+blok (pitch kecil + dist kecil di dekat dinding galian).
+
+Bentuk bebas `{ pos, look, to: { pos, look, fov } }` tetap bisa dipakai untuk gerak khusus.
+
+## Transisi (`trans` di shot tujuan)
+
+| `trans` | Durasi | Efek | Pakai untuk |
+|---|---|---|---|
+| `cut` | 0 | potong langsung (default) | pindah ke lokasi jauh/berbeda (dalam rumah, era lain) |
+| `whip` | 0.5 dtk | **kamera melesat cepat** dari posisi akhir shot sebelumnya ke shot ini + motion blur + whoosh keras | pindah ke **area yang bersebelahan** ("di sebelahnya", "lalu") |
+| `fly` | 0.9 dtk | kamera terbang halus | pindah sudut di area yang sama |
+| `zoom` | 0.45 dtk | punch-in (FOV menyempit sesaat) | penekanan, masuk ke detail |
+
+Objek di `add` otomatis muncul **setelah** transisi selesai (delay dihitung dari akhir transisi).
+
+**Membuat whip pan seperti "scene 1 dan 2 bersebelahan"**: bangun kedua area di satu `K.ground` yang
+menyambung, dengan pusat berjarak 18–30 m di sumbu x (mis. area A x≈0, area B x≈26). Shot terakhir di
+area A dan shot pertama di area B sebaiknya memakai `angle`/`pitch` yang mirip, sehingga kamera
+benar-benar terlihat bergeser ke kanan (atau ke kiri) melewati tanah yang menyambung. Lokasi yang tidak
+bersebelahan (dalam rumah) taruh jauh (x ≥ 80) dan masuki dengan `cut`.
