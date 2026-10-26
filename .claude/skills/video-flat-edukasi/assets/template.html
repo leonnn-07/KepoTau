@@ -200,7 +200,10 @@ const C = {
 
 /* ---------- timeline ---------- */
 let acc = 0;
-const TL = SCENES.map((s,i)=>{ const o={s,i,start:acc,end:acc+(s.dur||3)}; acc=o.end; return o; });
+// window.__DURS (diisi render.js saat voiceover) menimpa durasi agar pas dengan panjang suara
+const TL = SCENES.map((s,i)=>{ const d=(window.__DURS&&window.__DURS[i])||s.dur||3; const o={s,i,start:acc,end:acc+d}; acc=o.end; return o; });
+/** Teks voiceover scene: field vo, atau gabungan small + big. */
+const voText = s => s.type==='outro' ? (s.vo||'') : (s.vo ?? [s.small,s.big].filter(Boolean).join(' ').toLowerCase());
 const TOTAL = acc;
 const stage = document.getElementById('stage');
 const live = new Map();
@@ -252,7 +255,7 @@ addEventListener('keydown',e=>{ if(e.code==='Space'){e.preventDefault();playing?
 stage.addEventListener('click',()=>playing?pause():play());
 
 window.__TOTAL=TOTAL;
-window.__SCENES=TL.map(o=>({start:o.start,end:o.end,big:o.s.big||o.s.type}));
+window.__SCENES=TL.map(o=>({start:o.start,end:o.end,dur:o.end-o.start,big:o.s.big||o.s.type,vo:voText(o.s)}));
 window.__seek=t=>render(t);
 window.__ready=document.fonts.ready.then(()=>{ pos=Q.has('t')?+Q.get('t'):(Q.has('render')?0:1.2); render(pos); if(Q.has('autoplay')) play(); return TOTAL; });
 </script>

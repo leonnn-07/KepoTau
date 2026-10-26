@@ -7,7 +7,7 @@ jadi jangan taruh art di atas y ≈ 580.
 ## Format satu scene
 
 ```js
-{ dur: 3,                 // detik (2–4 umumnya; scene padat 4–5)
+{ dur: 3,                 // detik minimum (2–4); otomatis diperpanjang jika voiceover lebih panjang
   small: "teks pengantar",// baris kecil putih; kalau sama dengan scene sebelumnya, tidak dianimasikan ulang
   big: "KATA KUNCI",      // huruf besar, otomatis mengecil agar muat satu baris
   color: "yellow",        // warna kata kunci: yellow|purple|mint|blue|red|orange|white|pink|green atau hex
@@ -15,6 +15,7 @@ jadi jangan taruh art di atas y ≈ 580.
   rain: "light",          // opsional: hujan di seluruh layar, "light"|"heavy"
   cta: "tulis di komentar", // opsional: tombol putih di bawah
   bigSize: 110,           // opsional: ukuran awal kata kunci
+  vo: "teks untuk dibacakan", // opsional: voiceover; default = small + big; "" = tanpa suara
   art: C => A('pop',.3, C.sun(760,760)) + C.sprout(300,G,true) }
 { type: "outro", dur: 2.5 }   // layar penutup: brand + kolom cari @handle
 ```

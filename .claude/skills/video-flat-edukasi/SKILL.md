@@ -1,6 +1,6 @@
 ---
 name: video-flat-edukasi
-description: Membuat video animasi edukasi pendek vertikal 9:16 (TikTok/Reels/Shorts) bergaya flat vector ala akun sains "GEGARA" — latar navy, teks kecil + KATA KUNCI besar berwarna, ilustrasi flat (tanah, awan, bakteri, wajah profil, molekul, label pil), animasi pop/fade cepat per scene. Inputnya topik + naskah per scene; outputnya file HTML animasi siap diputar dan MP4 1080x1920. Gunakan skill ini setiap kali pengguna minta dibuatkan video edukasi/explainer/fakta unik/sains singkat, konten "kenapa ...?", animasi motion graphic untuk TikTok/Reels, atau menyebut video-flat-edukasi / gaya GEGARA — walaupun pengguna hanya memberi topik tanpa naskah.
+description: Membuat video animasi edukasi pendek vertikal 9:16 (TikTok/Reels/Shorts) bergaya flat vector ala akun sains "GEGARA" — latar navy, teks kecil + KATA KUNCI besar berwarna, ilustrasi flat (tanah, awan, bakteri, wajah profil, molekul, label pil), animasi pop/fade cepat per scene. Inputnya topik + naskah per scene; outputnya MP4 1080x1920 lengkap dengan voiceover bahasa Indonesia otomatis (edge-tts) yang sinkron per scene, plus file HTML sumber dan subtitle. Gunakan skill ini setiap kali pengguna minta dibuatkan video edukasi/explainer/fakta unik/sains singkat, konten "kenapa ...?", animasi motion graphic untuk TikTok/Reels, atau menyebut video-flat-edukasi / gaya GEGARA — walaupun pengguna hanya memberi topik tanpa naskah.
 ---
 
 # Video Flat Edukasi
@@ -59,23 +59,50 @@ diam, sementara elemen baru muncul.
    Engine di bawahnya jangan diubah. Helper SVG khusus topik boleh ditambahkan di atas `SCENES`.
 4. Rancang tiap scene: satu objek utama yang besar dan jelas, 1–3 label `pill`, animasi masuk
    bertahap. Layar 9:16 sempit, jadi lebih baik sedikit objek besar daripada banyak objek kecil.
-5. Cek visual: `node <skill>/scripts/render.js <file>.html --preview <file>-preview.png`, lalu
+5. Tulis voiceover per scene di field `vo` bila perlu (lihat bagian Voiceover). Tanpa `vo`, suara
+   membacakan teks kecil + kata kunci.
+6. Cek visual: `node <skill>/scripts/render.js <file>.html --preview <file>-preview.png`, lalu
    **lihat gambar pratinjaunya**. Perbaiki teks yang bertumpuk, objek yang keluar layar, art yang
    menutupi caption (y < 580), atau scene kosong. Jika skrip melaporkan "Error di halaman",
-   perbaiki scene yang disebut.
-6. Render MP4: `node <skill>/scripts/render.js <file>.html <file>.mp4` (± 2× durasi video). Kalau
-   pengguna punya voiceover, tambahkan `--audio narasi.mp3`.
-7. Tulis `<slug>-narasi.txt`, yaitu gabungan teks kecil dan kata kunci per scene sebagai naskah
-   voiceover/TTS (satu baris per scene, dengan perkiraan detik mulainya).
+   perbaiki scene yang disebut. Pratinjau memakai durasi `dur`, tanpa suara.
+7. Render MP4 final dengan voiceover: `node <skill>/scripts/render.js <file>.html <file>.mp4`
+   (opsi: `--voice id-ID-ArdiNeural` untuk suara pria, `--rate +15%`, `--music lagu.mp3`).
+   Skrip membuat suara tiap scene dengan edge-tts, memperpanjang scene yang suaranya lebih panjang
+   dari `dur`, lalu menggabungkan semuanya. Hasilnya `<file>.mp4`, `<file>-narasi.txt`, dan
+   `<file>.srt`. Lama render ± 2× durasi video.
 
-Butuh Node, `playwright` (Chromium), dan `ffmpeg`. Jika tidak tersedia, serahkan file HTML-nya
-saja: pengguna bisa membukanya di Chrome (klik PUTAR atau spasi; `?autoplay` di URL) lalu merekam
-layar. `?t=12` menampilkan detik ke-12 untuk pengecekan.
+## Voiceover
+
+Suara default adalah `id-ID-GadisNeural` (wanita) dari edge-tts: gratis dan natural, tapi butuh
+internet ke `speech.platform.bing.com` dan `pip install edge-tts`. Pilihan lain: `id-ID-ArdiNeural`
+(pria).
+
+Teks di layar ditulis untuk mata, sedangkan `vo` ditulis untuk telinga. Isi `vo` jika:
+- teks layar mengandung singkatan, simbol, atau angka yang dibaca aneh oleh TTS:
+  "±2,5 juta liter" → `vo: "sekitar dua setengah juta liter air"`, "MIT" → "em ai ti",
+  "GEOSMIN + MINYAK" → "geosmin dan minyak";
+- kalimat butuh kata sambung agar mengalir ("nah,", "ternyata,", "bayangin,");
+- scene yang hanya visual tidak perlu suara: `vo: ""`.
+
+Satu scene sebaiknya bersuara ≤ 12 kata (± 3 detik), karena tempo cepat adalah inti gaya ini.
+Outro tidak bersuara kecuali diberi `vo`.
+
+Jika edge-tts gagal (tidak ada internet atau host diblokir), skrip berhenti dengan pesan jelas.
+Jangan diam-diam membuat video tanpa suara: beri tahu pengguna, render `--no-vo` sebagai
+cadangan, dan serahkan `-narasi.txt` serta perintah render agar mereka bisa menjalankannya di
+komputer sendiri. Pengguna yang punya rekaman suara sendiri bisa memakai `--audio rekaman.mp3`
+(durasi scene tidak diubah).
+
+## Kebutuhan
+
+Node, `playwright` (Chromium), `ffmpeg`, dan `edge-tts` untuk suara. Jika tidak tersedia,
+serahkan file HTML-nya saja: pengguna bisa membukanya di Chrome (klik PUTAR atau spasi;
+`?autoplay` di URL) lalu merekam layar. `?t=12` menampilkan detik ke-12 untuk pengecekan.
 
 ## Hasil akhir untuk pengguna
 
-- `<slug>.html` (animasi; bisa diedit lagi)
-- `<slug>.mp4` (1080x1920, 30 fps) jika render berhasil
-- `<slug>-narasi.txt`
-- Tabel naskah singkat di chat (no | teks kecil | KATA KUNCI | detik) dan saran musik/SFX
-  (lo-fi pelan, bunyi "pop" setiap kata kunci muncul).
+- `<slug>.mp4`: video final 1080x1920, 30 fps, dengan voiceover (dan musik jika diberikan)
+- `<slug>.html`: sumber animasi, bisa diedit lalu dirender ulang
+- `<slug>-narasi.txt` dan `<slug>.srt`: naskah bertimestamp dan subtitle
+- Tabel naskah singkat di chat (no | teks layar | voiceover | detik), plus saran musik/SFX
+  (lo-fi pelan, bunyi "pop" setiap kata kunci muncul)
