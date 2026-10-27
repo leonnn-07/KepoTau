@@ -76,8 +76,8 @@ grow lainnya → `swish`.
 | `sign(pos, '1582', {w,h,rot})` | papan putih bertiang, untuk tahun/era/nama tempat |
 | `brandBoard(pos, rotY, scale)` | papan berlogo resmi KepoTau + @kepotau.ofc; tempel di dinding/tangki (pos = tengah papan) |
 | `banner(pos, {w, h, pole, rot})` | **spanduk kain** berlogo KepoTau di antara dua tiang, berkibar pelan |
-| `flag(pos, {h, fw, fh, rot})` | **bendera** berlogo KepoTau di tiang tinggi, berkibar (kain memanjang ke +x lokal; putar `rot` 180 untuk ke kiri) |
-| `label(pos, text)` | label pil putih melayang (selalu menghadap kamera, terlihat menembus objek). Otomatis hilang di akhir shot tempat ia muncul; set `userData.keep = true` agar bertahan |
+| `flag(pos, {h, fw, fh, rot})` | **bendera** berlogo KepoTau di tiang tinggi, berkibar (kain memanjang ke +x lokal; putar `rot` 180 untuk ke kiri; logo tetap terbaca benar dari kedua sisi) |
+| `label(pos, text, {s})` | label pil putih melayang; `s` = skala (default 0.7; 0.45–0.6 untuk kamera dekat, dist < 8) (selalu menghadap kamera, terlihat menembus objek). Otomatis hilang di akhir shot tempat ia muncul; set `userData.keep = true` agar bertahan |
 
 **Partikel & primitif**
 
@@ -139,6 +139,16 @@ beton `#8d8a84`, logam `#b9c2cb`), material kasar (rough .8–.9) kecuali air/lo
 atas tanah dan mesin air di dasar parit, karena penonton membaca cerita dari penampang tanah.
 
 ## Tata letak & kedalaman
+
+- **Topik pabrik/dalam ruangan**: pakai `K.floor(pos, [w, d], {type:'concrete'|'tile'})` di atas tanah
+  (tekstur tidak meregang di lantai panjang) dan `K.wall(pos, [w, h])` setinggi ≤ 1.2 m di belakang.
+  Dinding tinggi akan menutupi reklame; kalau perlu dinding tinggi, pasang `K.ads` di depannya dan
+  `K.poster` di dindingnya. Tetap biarkan tepi depan tanah dekat dengan mesin (z1 ≈ 3–4) agar
+  penampang tanah terlihat.
+- Material logam terang: `M.alu()` (atau `metal` ≤ 0.4). Nilai metal tinggi terlihat abu gelap.
+- Bayangan matahari otomatis mengikuti area yang disorot kamera, jadi area di x jauh tetap berbayang.
+- Pilih waktu `--frames` dengan `render.js <file>.html --list-shots` (mencetak detik tiap shot).
+- Objek yang tidak relevan di shot berikutnya (orang, label) beri id lalu `remove`.
 
 - `ground.depth` minimal 12–14 m, karena shot lebar dari atas akan memperlihatkan "void" berwarna langit
   di bawah blok tanah yang dangkal. Untuk sumur bor/tambang, pakai 18–25 m.

@@ -16,6 +16,7 @@
  *     --cpu                       paksa render CPU (SwiftShader) bila GPU bermasalah
  *   node render.js video.html --preview preview.png      # lembar kontak 1 frame per scene
  *   node render.js video.html --frames 11.5,67           # screenshot ukuran penuh di detik tertentu
+ *   node render.js video.html --list-shots               # cetak detik mulai–selesai tiap shot (untuk memilih --frames)
  *   node render.js video.html --list-vo                  # tulis <nama>-vo-lines.txt: kalimat VO per scene
  *
  * Voiceover: teks tiap scene (field `vo`, default teks kecil + kata kunci) diubah jadi suara
@@ -42,6 +43,7 @@ const engine = opt('--tts', process.env.ELEVENLABS_API_KEY ? 'elevenlabs' : 'edg
 const voice = opt('--voice', engine === 'elevenlabs' ? '21m00Tcm4TlvDq8ikWAM' : 'id-ID-GadisNeural');
 const voDir = opt('--vo-dir');
 const listVO = flag('--list-vo');
+const listShots = flag('--list-shots');
 const rate = opt('--rate', '+10%');
 const music = opt('--music');
 const sfxVol = flag('--no-sfx') ? 0 : +opt('--sfx-vol', 0.5);
@@ -49,8 +51,8 @@ const SFX_DIR = path.join(__dirname, '..', 'assets', 'sfx');
 const ownAudio = opt('--audio');
 const preview = opt('--preview');
 const framesAt = opt('--frames');
-const useVO = !preview && !framesAt && !listVO && !ownAudio && !flag('--no-vo');
-const out = (preview || framesAt || listVO) ? null : (args[1] && !args[1].startsWith('--') ? args[1] : input.replace(/\.html?$/, '') + '.mp4');
+const useVO = !preview && !framesAt && !listVO && !listShots && !ownAudio && !flag('--no-vo');
+const out = (preview || framesAt || listVO || listShots) ? null : (args[1] && !args[1].startsWith('--') ? args[1] : input.replace(/\.html?$/, '') + '.mp4');
 const base = (out || input).replace(/\.(mp4|html?)$/, '');
 const LEAD = 0.25, TAIL = 0.45; // jeda sebelum & sesudah suara di tiap scene
 
@@ -111,6 +113,7 @@ function tts(text, file) {
   if (!(await page.evaluate(async () => { try { await Promise.all(['500 40px Poppins', '900 40px Poppins'].map(f => document.fonts.load(f))); } catch (e) {} return document.fonts.check('900 40px Poppins'); })))
     console.warn('Peringatan: font Poppins gagal dimuat (offline?) — teks memakai font cadangan.');
 
+  if (listShots) { scenes.forEach((sc, i) => console.log(`${String(i + 1).padStart(2, '0')}  ${sc.start.toFixed(2)}–${sc.end.toFixed(2)} dtk  ${sc.big || ''}`)); await browser.close(); return; }
   if (listVO) {
     const f = base + '-vo-lines.txt';
     fs.writeFileSync(f, scenes.map((sc, i) => (sc.vo || '').trim() ? `${String(i + 1).padStart(2, '0')} | ${sc.vo.trim()}` : null).filter(Boolean).join('\n') + '\n');
