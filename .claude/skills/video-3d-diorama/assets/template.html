@@ -17,6 +17,10 @@ html,body{height:100%;background:#0b0a1a;overflow:hidden;font-family:'Plus Jakar
 #cap{position:absolute;left:60px;right:60px;top:1150px;text-align:center;color:#fff;font-weight:800;font-size:76px;line-height:1.15;letter-spacing:-.5px;
   text-shadow:0 4px 14px rgba(0,0,0,.55),0 2px 3px rgba(0,0,0,.6);white-space:pre-wrap}
 #cap span{display:inline-block}
+#logo{position:absolute;left:36px;top:70px;width:230px;padding:10px 22px;border-radius:999px;z-index:5;
+  background:linear-gradient(135deg,rgba(31,27,74,.62),rgba(31,27,74,.38));border:1.5px solid rgba(255,255,255,.35);
+  box-shadow:0 12px 30px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.4);backdrop-filter:blur(14px) saturate(150%)}
+#logo svg{display:block;width:100%;height:auto}
 #wm{position:absolute;right:40px;bottom:46px;color:rgba(255,255,255,.9);font-weight:700;font-size:30px;text-shadow:0 2px 6px rgba(0,0,0,.5)}
 #outro{position:absolute;inset:0;background:var(--bg);visibility:hidden}
 #outro svg.logo{position:absolute;inset:0;width:1080px;height:1920px}
@@ -39,7 +43,7 @@ body.render #play,body.render #bar{display:none}
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute"><filter id="mblur" x="0" y="0" width="100%" height="100%"><feGaussianBlur id="mblurStd" stdDeviation="0 0" edgeMode="duplicate"/></filter></svg>
-<div id="wrap"><div id="stage"><canvas id="gl" width="1080" height="1920"></canvas><div id="cap"></div><div id="wm"></div><div id="outro"></div></div></div>
+<div id="wrap"><div id="stage"><canvas id="gl" width="1080" height="1920"></canvas><div id="cap"></div><div id="logo"></div><div id="wm"></div><div id="outro"></div></div></div>
 <button id="play">▶ PUTAR</button>
 <div id="bar"></div>
 <script>
@@ -51,8 +55,8 @@ const CONFIG = {
   brand: "KepoTau",
   brandSplit: 4,               // logo outro: "Kepo" putih, "Tau" kuning
   tagline: "",
-  handle: "@kepotau.ofc",      // watermark kanan bawah
-  socials: [ { icon: "tiktok", handle: "@kepotau.ofc" }, { icon: "instagram", handle: "@kepotau.ofc" } ],
+  handle: "@3d.kepotau.ofc",   // watermark kanan bawah + teks di spanduk/billboard (akun khusus video 3D)
+  socials: [ { icon: "tiktok", handle: "@3d.kepotau.ofc" }, { icon: "instagram", handle: "@3d.kepotau.ofc" } ],
   ambience: true,              // suara angin + burung samar di bawah VO
 };
 
@@ -64,6 +68,11 @@ const WORLD = K => [
   K.ground({ x: [-18, 44], z: [-5, 5], depth: 14, cuts: [ { x: [2, 7], depth: 1.6 }, { x: [23.4, 28.6], z: [-1.7, 5], depth: 3.3 } ] }),
   K.water([4.5, -1.6, 0], [5, 0.9, 10], { color: '#8a7a5c' }),
   K.fence([-12, 0, -4.6], [-1, 0, -4.6]), K.fence([8, 0, -4.6], [40, 0, -4.6]),
+  // reklame KepoTau di sepanjang tepi belakang (billboard, bendera, bunting, standee, spanduk bergantian)
+  K.ads({ x: [-18, 44], z: -3.9, every: 6.5, skip: [[-4.5, 1.5], [1.5, 7.5]] }),  // kosongkan belakang papan tahun & parit sungai
+  K.flag([8.6, 0, 2.2], { rot: -25 }), K.flag([30.8, 0, 2.4], { rot: -15 }),
+  // gerigi yang digerakkan poros kincir (detail mekanis: semua bagian bergerak)
+  K.gears([6.4, -0.3, 1.2], { list: [ { r: .55, teeth: 12 }, { r: .35, teeth: 8 } ], speed: -0.6, angle: 90 }),
 ];
 
 /* SHOTS: tiap shot = satu kalimat VO + caption kata per kata + kamera + transisi + objek yang muncul.
@@ -83,7 +92,7 @@ const SHOTS = [
                 A(K.pipe([[3.2, -0.7, 0.8], [0.2, -0.7, 0.8], [0.2, 4.7, 0.8]]), 'grow', .7) ] },
   { say: "terus salurin lewat pipa ke rumah",
     cam: { focus: [-4, 1.5, -0.5], dist: 16, angle: -28, pitch: 26, move: 'truckL' },
-    add: K => [ A(K.house([-6.5, 0, -1], { w: 3.4, d: 3.6, h: 2.8 }), 'drop', .2),
+    add: K => [ A(K.house([-6.5, 0, -1], { w: 3.4, d: 3.6, h: 2.8 }), 'drop', .2), A(K.poster([-7.55, 1.7, 0.82], { w: 1.1, h: .55 }), 'pop', .8),
                 A(K.pipe([[-1.8, 4.5, 0.8], [-4.2, 4.5, 0.8], [-4.2, 1.8, 0.8]]), 'grow', .9) ] },
   { say: "airnya nyampe, tapi warnanya kayak teh susu",
     cam: { focus: [80.2, 1.5, -0.6], dist: 7, angle: 25, pitch: 14, move: 'push' },
@@ -108,6 +117,8 @@ const SHOTS = [
    ENGINE — tidak perlu diubah
    ===================================================================== */
 const LEAD = 0.25;
+const LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 300" ><g transform="translate(0 0) scale(1.00000)"><g fill="none" stroke-linecap="round" stroke-linejoin="round"> <path d="M46 296 C54 254 84 236 120 230" stroke="#E6EAF2" stroke-width="7"/> <path d="M128 212 L126 232 M168 214 L170 230" stroke="#E6EAF2" stroke-width="7"/> <path d="M150 56 C206 54 236 96 232 146 C228 194 196 222 148 222 C100 222 70 192 68 144 C66 100 94 62 144 57" stroke="#E6EAF2" stroke-width="7"/> <path d="M70 134 C54 128 48 150 58 162 C62 168 68 168 72 166" stroke="#E6EAF2" stroke-width="6"/> <path d="M100 74 C102 54 118 42 132 40 M130 60 C134 40 152 30 170 32 M164 60 C174 44 192 44 204 52" stroke="#E6EAF2" stroke-width="6"/> <path d="M80 106 C92 94 108 94 118 100 C126 88 142 84 156 90" stroke="#E6EAF2" stroke-width="5"/> <path d="M94 116 C102 108 114 106 124 110" stroke="#E6EAF2" stroke-width="5.5"/> <ellipse cx="110" cy="136" rx="10" ry="12" stroke="#E6EAF2" stroke-width="5"/> <circle cx="114" cy="133" r="4.5" fill="#E6EAF2" stroke="none"/> <path d="M138 142 C134 154 132 162 140 166 C144 168 148 166 150 164" stroke="#E6EAF2" stroke-width="5"/> <ellipse cx="128" cy="190" rx="8" ry="9.5" stroke="#E6EAF2" stroke-width="5"/> <path d="M84 166 l9 -4 M90 174 l9 -4" stroke="#F5B21B" stroke-width="3.5" opacity=".75"/> <ellipse cx="182" cy="134" rx="21" ry="24" stroke="#E6EAF2" stroke-width="5.5"/> <circle cx="188" cy="128" r="10" fill="#E6EAF2" stroke="none"/> <circle cx="192" cy="124" r="3.2" fill="#1F1B4A" stroke="none"/> <path d="M160 100 C172 92 190 92 202 98" stroke="#E6EAF2" stroke-width="5"/> <circle cx="182" cy="134" r="44" stroke="#F5B21B" stroke-width="9"/> <path d="M154 108 C160 100 168 96 176 95" stroke="#FFFFFF" stroke-width="4" opacity=".55"/> <path d="M214 166 L224 180" stroke="#F5B21B" stroke-width="15"/> <path d="M228 244 C236 262 244 280 248 298 M262 236 C272 254 280 276 284 298" stroke="#E6EAF2" stroke-width="7"/> <path d="M222 206 C222 194 236 188 248 194 L262 204 C272 212 272 230 262 238 C252 246 236 248 226 240 C216 232 216 216 222 206 Z" stroke="#E6EAF2" stroke-width="6.5"/> <path d="M232 202 C238 208 238 216 232 222 M244 206 C250 212 250 222 244 228 M256 214 C260 220 258 228 252 234" stroke="#E6EAF2" stroke-width="4.5"/> <path d="M222 214 C214 212 208 218 212 226 C214 230 220 230 224 228" stroke="#E6EAF2" stroke-width="5"/> <path d="M30 72 C30 54 52 48 60 60 C68 72 52 78 48 88 L48 96" stroke="#F5B21B" stroke-width="7"/> <circle cx="48" cy="112" r="4.5" fill="#F5B21B" stroke="none"/> </g> </g><g transform="translate(311.02 197.03) scale(0.16033)"><path fill="#E3E7EF" d="M473 0 252 -309V0H56V-705H252V-401L471 -705H697L438 -363L710 0ZM1290 -241H919Q922 -195 944.5 -172.5Q967 -150 1002 -150Q1051 -150 1072 -194H1281Q1268 -136 1230.5 -90.5Q1193 -45 1136.0 -19.0Q1079 7 1010 7Q927 7 862.5 -28.0Q798 -63 761.5 -128.0Q725 -193 725 -281Q725 -369 761.0 -433.5Q797 -498 861.5 -533.0Q926 -568 1010 -568Q1093 -568 1157.0 -534.0Q1221 -500 1257.0 -436.5Q1293 -373 1293 -287Q1293 -264 1290 -241ZM1093 -336Q1093 -372 1069.0 -392.5Q1045 -413 1009 -413Q973 -413 950.0 -393.5Q927 -374 920 -336ZM1708 -568Q1775 -568 1829.5 -533.0Q1884 -498 1915.5 -433.0Q1947 -368 1947 -281Q1947 -194 1915.5 -128.5Q1884 -63 1829.5 -28.0Q1775 7 1708 7Q1651 7 1609.5 -16.0Q1568 -39 1544 -78V268H1348V-561H1544V-483Q1567 -522 1609.0 -545.0Q1651 -568 1708 -568ZM1646 -397Q1603 -397 1573.5 -366.0Q1544 -335 1544 -281Q1544 -226 1573.5 -195.0Q1603 -164 1646 -164Q1689 -164 1718.5 -195.5Q1748 -227 1748 -281Q1748 -336 1718.5 -366.5Q1689 -397 1646 -397ZM1971 -281Q1971 -368 2009.5 -433.0Q2048 -498 2114.5 -533.0Q2181 -568 2265 -568Q2349 -568 2415.5 -533.0Q2482 -498 2520.5 -433.0Q2559 -368 2559 -281Q2559 -194 2520.5 -128.5Q2482 -63 2415.0 -28.0Q2348 7 2264 7Q2180 7 2113.5 -28.0Q2047 -63 2009.0 -128.0Q1971 -193 1971 -281ZM2360 -281Q2360 -338 2332.5 -368.0Q2305 -398 2265 -398Q2225 -398 2198.0 -368.0Q2171 -338 2171 -281Q2171 -223 2197.0 -193.0Q2223 -163 2264 -163Q2305 -163 2332.5 -193.5Q2360 -224 2360 -281Z"/><path fill="#F5B21B" d="M3145 -705V-549H2957V0H2761V-549H2575V-705ZM3400 -568Q3458 -568 3500.0 -545.0Q3542 -522 3565 -483V-561H3761V0H3565V-78Q3542 -39 3499.5 -16.0Q3457 7 3400 7Q3333 7 3278.5 -28.0Q3224 -63 3192.5 -128.5Q3161 -194 3161 -281Q3161 -368 3192.5 -433.0Q3224 -498 3278.5 -533.0Q3333 -568 3400 -568ZM3463 -397Q3419 -397 3390.0 -366.5Q3361 -336 3361 -281Q3361 -227 3390.0 -195.5Q3419 -164 3463 -164Q3506 -164 3535.5 -195.0Q3565 -226 3565 -281Q3565 -335 3535.5 -366.0Q3506 -397 3463 -397ZM4422 -561V0H4225V-80Q4200 -42 4156.0 -18.5Q4112 5 4055 5Q3957 5 3900.5 -59.5Q3844 -124 3844 -235V-561H4039V-260Q4039 -212 4064.5 -184.5Q4090 -157 4132 -157Q4175 -157 4200.0 -184.5Q4225 -212 4225 -260V-561Z"/></g></svg>';
+let LOGO_IMG = null; // gambar logo resmi untuk tekstur spanduk/papan 3D
 let _seed = 3;
 const rnd = () => { _seed = (_seed * 16807) % 2147483647; return (_seed - 1) / 2147483646; };
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
@@ -157,6 +168,12 @@ function textTex(text,o={}){ return canvasTex(o.w||512,o.h||256,(g,w,h)=>{ g.fil
   do { g.font=`${o.weight||600} ${fs}px ${ff}`; fs-=4; } while(g.measureText(text).width>w-48 && fs>20); g.fillText(text,w/2,(o.sub?h*.42:h/2));
   if(o.sub){ g.font=`600 ${o.subSize||46}px Poppins,sans-serif`; g.fillStyle=o.subColor||o.color; g.fillText(o.sub,w/2,h*.75); } }); }
 
+/** Tekstur logo resmi KepoTau di atas latar warna (untuk spanduk/papan/bendera) + handle di bawahnya. */
+function logoTex(w,h,bg='#1F1B4A'){ return canvasTex(w,h,(g,W,H)=>{ g.fillStyle=bg; g.fillRect(0,0,W,H);
+  const lw=W*.78, lh=lw*300/1040, ly=(H-lh)/2-H*.06; if(LOGO_IMG) g.drawImage(LOGO_IMG,(W-lw)/2,ly,lw,lh);
+  g.fillStyle='rgba(227,231,239,.85)'; g.font=`600 ${Math.round(W*.045)}px Poppins,sans-serif`; g.textAlign='center'; g.textBaseline='middle'; g.fillText(CONFIG.handle,W/2,Math.min(H-W*.05,ly+lh+W*.06));
+  g.strokeStyle='#F5B21B'; g.lineWidth=W*.012; g.strokeRect(W*.02,H*.04,W*.96,H*.92); }); }
+
 /* ---------- prefab K.* (origin = tengah bawah objek) ---------- */
 const K = {
   /** Padang rumput datar di belakang garis potong cutZ (z < cutZ). */
@@ -187,11 +204,23 @@ const K = {
     g.add(box(.08,1.5,.08,m,[-w*.35,.75,0]),box(.08,1.5,.08,m,[w*.35,.75,0]));
     const face=M.std('#ffffff',{map:textTex(text,{w:Math.round(256*w/h),h:256,size:150,weight:500,color:'#4a4a4a'}),rough:.8}); g.add(mesh(new THREE.BoxGeometry(w,h,.06),[M.std('#e8e8e4'),M.std('#e8e8e4'),M.std('#e8e8e4'),M.std('#e8e8e4'),face,M.std('#e8e8e4')],[0,1.5+h/2-.1,.05])); return g; },
   /** Papan branding KepoTau (biru) untuk ditempel di dinding/tangki. rot = rotasi Y. */
-  brandBoard(pos,rot=0,s=1){ const tex=canvasTex(512,220,(g,w,h)=>{ g.fillStyle='#2f5fa8'; g.fillRect(0,0,w,h); g.strokeStyle='#dbe7ff'; g.lineWidth=10; g.strokeRect(12,12,w-24,h-24);
-      g.textAlign='center'; g.textBaseline='middle'; g.font="900 104px Poppins,sans-serif"; const k=CONFIG.brandSplit??CONFIG.brand.length, a=CONFIG.brand.slice(0,k), b=CONFIG.brand.slice(k);
-      const wa=g.measureText(a).width, wb=g.measureText(b).width, x0=w/2-(wa+wb)/2; g.textAlign='left'; g.fillStyle='#fff'; g.fillText(a,x0,h*.43); g.fillStyle='#FBBF24'; g.fillText(b,x0+wa,h*.43);
-      g.textAlign='center'; g.font="600 36px Poppins,sans-serif"; g.fillStyle='#dbe7ff'; g.fillText(CONFIG.handle,w/2,h*.8); });
-    const g=grp(pos, mesh(new THREE.BoxGeometry(1.2*s,.52*s,.04),[M.std('#1f3f75'),M.std('#1f3f75'),M.std('#1f3f75'),M.std('#1f3f75'),M.std('#ffffff',{map:tex,rough:.6}),M.std('#1f3f75')],[0,0,0],false)); g.rotation.y=rot; return g; },
+  brandBoard(pos,rot=0,s=1){ const tex=logoTex(1024,440,'#1F1B4A');
+    const g=grp(pos, mesh(new THREE.BoxGeometry(1.2*s,.52*s,.04),[M.std('#14112f'),M.std('#14112f'),M.std('#14112f'),M.std('#14112f'),M.std('#ffffff',{map:tex,rough:.6}),M.std('#14112f')],[0,0,0],false)); g.rotation.y=rot; return g; },
+  /** Spanduk kain berlogo KepoTau di antara dua tiang, berkibar pelan. pos = tengah bawah, rot = derajat. */
+  banner(pos,{w=3,h=1.3,pole=2.6,rot=0,color='#1F1B4A'}={}){ const g=grp(pos), m=M.wood(), sx=24, sy=10;
+    g.add(cyl(.06,.07,pole,m,[-w/2-.05,pole/2,0],8), cyl(.06,.07,pole,m,[w/2+.05,pole/2,0],8));
+    const geo=new THREE.PlaneGeometry(w,h,sx,sy), cloth=mesh(geo,new THREE.MeshStandardMaterial({map:logoTex(1024,Math.round(1024*h/w),color),side:THREE.DoubleSide,roughness:.9}),[0,pole-h/2-.08,0]);
+    const base=geo.attributes.position.array.slice(); g.add(cloth); g.rotation.y=rot*Math.PI/180;
+    g.userData.update=t=>{ const a=geo.attributes.position.array; for(let k=0;k<a.length;k+=3){ const x=base[k], y=base[k+1], edge=1-Math.abs(x)/(w/2); a[k+2]=Math.sin(x*2.2+t*3.1)*.07*edge+Math.sin(y*3+t*2.3)*.03*edge; } geo.attributes.position.needsUpdate=true; geo.computeVertexNormals(); };
+    return g; },
+  /** Bendera berlogo di tiang tinggi, berkibar. pos = kaki tiang, rot = derajat. */
+  flag(pos,{h=4.5,fw=1.8,fh=1.0,rot=0,color='#1F1B4A'}={}){ const g=grp(pos), sx=20, sy=8;
+    g.add(cyl(.05,.06,h,M.metal('#c9cfd5'),[0,h/2,0],10), mesh(new THREE.SphereGeometry(.09,12,8),M.metal('#d4a72c'),[0,h+.05,0]));
+    const geo=new THREE.PlaneGeometry(fw,fh,sx,sy); geo.translate(fw/2,0,0);
+    const cloth=mesh(geo,new THREE.MeshStandardMaterial({map:logoTex(1024,Math.round(1024*fh/fw),color),side:THREE.DoubleSide,roughness:.9}),[.04,h-fh/2-.1,0]);
+    const base=geo.attributes.position.array.slice(); g.add(cloth); g.rotation.y=rot*Math.PI/180;
+    g.userData.update=t=>{ const a=geo.attributes.position.array; for(let k=0;k<a.length;k+=3){ const x=base[k], y=base[k+1], f=x/fw; a[k+2]=Math.sin(x*3-t*5)*.16*f; a[k+1]=y-f*f*.08+Math.sin(x*2-t*4)*.03*f; } geo.attributes.position.needsUpdate=true; geo.computeVertexNormals(); };
+    return g; },
   /** Kincir air kayu, berputar terus. pos = titik bawah poros-ish (pusat roda di y + r*0.8). */
   waterWheel(pos,{r=1.6,width=1.1,speed=.6}={}){ const g=grp(pos), m=M.wood(), wheel=new THREE.Group(), cy=r*.8;
     for(const z of [-width/2,width/2]){ const rim=mesh(new THREE.TorusGeometry(r,.07,8,40),m,[0,0,z]); wheel.add(rim);
@@ -279,6 +308,112 @@ const K = {
     g.add(box(w+.3,.1,w+.3,m,[0,h+.05,0]), cyl(.68,.68,1.4,M.std(color,{rough:.45}),[0,h+.8,0],28), mesh(new THREE.SphereGeometry(.68,28,10,0,Math.PI*2,0,Math.PI/2),M.std(color,{rough:.45}),[0,h+1.5,0]));
     for(const y of [h+.5,h+1.0]) g.add(cyl(.70,.70,.05,M.std('#245a94'),[0,y,0],28));
     g.add(K.brandBoard([0,h-.35,w/2+.02],0,.5)); return g; },
+  /* ===== MESIN DENGAN BAGIAN BERGERAK (pakai ini, jangan tabung diam) ===== */
+  /** Roda gigi bergerigi yang berputar. r = jari-jari pitch, teeth = jumlah gigi, speed = rad/dtk (negatif = searah jarum jam).
+   *  Menghadap +z (sumbu putar = z). axis:'y' untuk gigi rebah (sumbu vertikal). phase dalam radian. */
+  gear(pos,{r=.8,teeth=16,thick=.25,speed=1,color='#b7a27a',phase=0,axis='z',spokes=true}={}){
+    const d=r*Math.min(.22,2.4/teeth), ro=r+d*.55, ri=r-d*.75, sh=new THREE.Shape(), N=teeth, step=Math.PI*2/N;
+    for(let i=0;i<N;i++){ const a=i*step; const P=[[ri,a],[ri,a+step*.12],[ro,a+step*.3],[ro,a+step*.5],[ri,a+step*.68],[ri,a+step]];
+      P.forEach(([rr,aa],k)=>{ const x=Math.cos(aa)*rr, y=Math.sin(aa)*rr; (i===0&&k===0)?sh.moveTo(x,y):sh.lineTo(x,y); }); }
+    const hole=new THREE.Path(); hole.absarc(0,0,r*.14,0,Math.PI*2,true); sh.holes.push(hole);
+    if(spokes&&r>.45){ for(let k=0;k<5;k++){ const a0=k*Math.PI*2/5+.25, a1=a0+Math.PI*2/5-.5, p=new THREE.Path(); p.absarc(0,0,ri*.78,a0,a1,false); p.lineTo(Math.cos(a1)*r*.34,Math.sin(a1)*r*.34); p.absarc(0,0,r*.34,a1,a0,true); sh.holes.push(p); } }
+    const geo=new THREE.ExtrudeGeometry(sh,{depth:thick,bevelEnabled:true,bevelThickness:.015,bevelSize:.015,bevelSegments:1,curveSegments:24}); geo.translate(0,0,-thick/2);
+    const mat=M.std(color,{rough:.45,metal:.6}), g=grp(pos), rot=new THREE.Group(), m=mesh(geo,mat);
+    rot.add(m, cyl(r*.2,r*.2,thick*1.6,M.metal('#6b7279'),[0,0,0],16).rotateX(Math.PI/2));
+    if(axis==='y') rot.rotation.x=-Math.PI/2; g.add(rot);
+    g.userData.update=t=>{ m.rotation.z=phase+t*speed; }; g.userData.gear={r,teeth,speed}; return g; },
+  /** Rangkaian roda gigi yang saling mengunci: posisi & arah putar dihitung otomatis (gigi berikutnya berputar berlawanan,
+   *  kecepatan = speed × teeth1/teeth2). list: [{r, teeth, color?}], angle = arah susunan (derajat, 0 = ke kanan). */
+  gears(pos,{list=[{r:.9,teeth:18},{r:.5,teeth:10}],speed=1,angle=0,thick=.25}={}){
+    const g=grp(pos), a=angle*Math.PI/180, wrap=(v,p)=>((v%p)+p*1.5)%p-p/2; let x=0,y=0,sp=speed,ph=0,prev=null;
+    list.forEach((it,i)=>{ const st=Math.PI*2/it.teeth;
+      if(prev){ const ps=Math.PI*2/prev.teeth, e1=wrap(prev.ph+.4*ps-a,ps); x+=Math.cos(a)*(prev.r+it.r); y+=Math.sin(a)*(prev.r+it.r);
+        sp=-prev.sp*prev.r/it.r; ph=(a+Math.PI-e1*prev.r/it.r)-st/2-.4*st; }
+      g.add(K.gear([x,y,0],{r:it.r,teeth:it.teeth,thick,speed:sp,phase:ph,color:it.color||['#b7a27a','#9aa3ab','#c08a4a'][i%3]})); prev={...it,sp,ph}; });
+    return g; },
+  /** Engkol + batang penghubung + piston yang naik-turun di silinder (mesin, pompa, kompresor). */
+  crankPiston(pos,{r=.35,rod=1.3,speed=3,bore=.32,color='#9aa3ab'}={}){ const g=grp(pos), mm=M.metal(color), wheel=new THREE.Group();
+    wheel.add(cyl(r*1.4,r*1.4,.14,M.metal('#6b7279'),[0,0,0],28).rotateX(Math.PI/2), cyl(.06,.06,.4,mm,[r,0,.12],10).rotateX(Math.PI/2), box(r*1.1,.12,.06,M.metal('#d4a72c'),[r*.55,0,.1])); g.add(wheel);
+    const rodM=box(.08,rod,.08,M.metal('#c0c6cc')); rodM.geometry.translate(0,rod/2,0); g.add(rodM);
+    const piston=cyl(bore*.92,bore*.92,.35,M.metal('#d4d8dc'),[0,0,0],20); g.add(piston);
+    g.add(cyl(bore,bore,2*r+.7,M.std('#7d8a96',{rough:.3,metal:.5,opacity:.35}),[0,rod+.2,.12],24));
+    g.userData.update=t=>{ const th=t*speed; wheel.rotation.z=th; const px=Math.cos(th)*r, py=Math.sin(th)*r, yy=py+Math.sqrt(rod*rod-px*px);
+      rodM.position.set(px,py,.12); rodM.rotation.z=Math.atan2(px,yy-py); piston.position.set(0,yy+.1,.12); }; return g; },
+  /** Turbin / baling-baling berputar (air, angin, kipas). axis 'z' menghadap kamera, 'y' horizontal. */
+  turbine(pos,{r=1,blades=6,speed=4,color='#c9cfd5',axis='z',hub=true}={}){ const g=grp(pos), rot=new THREE.Group(), mm=M.std(color,{rough:.4,metal:.5});
+    for(let i=0;i<blades;i++){ const b=box(r*.9,r*.22,.05,mm,[r*.5,0,0]); b.rotation.x=.45; const arm=new THREE.Group(); arm.add(b); arm.rotation.z=i*Math.PI*2/blades; rot.add(arm); }
+    if(hub) rot.add(mesh(new THREE.SphereGeometry(r*.16,16,12),M.metal('#6b7279')));
+    if(axis==='y') rot.rotation.x=-Math.PI/2; const spin=new THREE.Group(); spin.add(rot); g.add(spin);
+    g.userData.update=t=>{ if(axis==='y') rot.rotation.z=t*speed; else spin.rotation.z=t*speed; }; return g; },
+  /** Ban berjalan (conveyor): sabuk bergerak (tekstur bergeser), rol berputar, barang ikut berjalan lalu muncul lagi.
+   *  item: fungsi () => objek, atau warna kotak. len sepanjang sumbu x. */
+  conveyor(pos,{len=5,w=1,h=.9,speed=.6,items=4,item='#c08a4a'}={}){ const g=grp(pos), mm=M.metal('#7d858c');
+    for(const x of [-len/2+.2,len/2-.2]) for(const z of [-w/2,w/2]) g.add(box(.1,h,.1,mm,[x,h/2,z]));
+    const tex=canvasTex(256,64,(c,W,H)=>{ c.fillStyle='#2b2b2e'; c.fillRect(0,0,W,H); c.fillStyle='#3a3a3e'; for(let i=0;i<W;i+=32) c.fillRect(i,0,12,H); },[len*2,1]);
+    g.add(box(len,.06,w,M.std('#ffffff',{map:tex,rough:.8}),[0,h+.03,0]));
+    const rollers=[]; for(let i=0;i<=Math.round(len/.5);i++){ const rl=cyl(.07,.07,w+.1,M.metal('#a8b0b8'),[-len/2+i*len/Math.round(len/.5),h-.04,0],12); rl.rotation.x=Math.PI/2; g.add(rl); rollers.push(rl); }
+    g.add(box(len,.12,.06,mm,[0,h-.02,w/2+.05]), box(len,.12,.06,mm,[0,h-.02,-w/2-.05]));
+    const its=[]; for(let i=0;i<items;i++){ const it=typeof item==='function'?item():box(.4,.3,.4,M.std(item,{rough:.7}),[0,.15,0]); const holder=grp([0,h+.06,0],it); g.add(holder); its.push(holder); }
+    g.userData.update=(t,lt)=>{ tex.offset.x=-lt*speed*2; rollers.forEach(r=>r.rotation.y=-lt*speed/.07);
+      its.forEach((it,i)=>{ const u=((lt*speed/len)+i/items)%1; it.position.x=-len/2+u*len; it.visible=u>.02&&u<.98; }); }; return g; },
+  /** Mesin press/stamping: palu turun-naik berirama (pabrik, cetak logam). */
+  press(pos,{w=1.4,h=2.6,speed=1.2,color='#c0573a'}={}){ const g=grp(pos), mm=M.std(color,{rough:.5,metal:.3});
+    g.add(box(w,.25,w*.8,mm,[0,.125,0]), box(.18,h,.18,mm,[-w/2+.09,h/2,0]), box(.18,h,.18,mm,[w/2-.09,h/2,0]), box(w,.3,w*.8,mm,[0,h,0]));
+    const ram=grp([0,0,0], box(w*.55,.35,w*.5,M.metal('#9aa3ab'),[0,0,0]), cyl(.08,.08,1,M.metal('#d4d8dc'),[0,.65,0],10)); g.add(ram);
+    g.userData.update=t=>{ const ph=(t*speed)%1, down=ph<.15?E.out(ph/.15):ph<.3?1:1-E.inOut((ph-.3)/.7); ram.position.y=h-.5-down*(h-1.05); }; return g; },
+  /** Asap/uap yang naik dan membesar (cerobong, mesin uap, ketel). */
+  smoke(pos,{n=10,color='#d9dde2',rise=3,size=.35,speed=.5}={}){ const g=grp(pos), mat=M.std(color,{rough:1,opacity:.7}), ps=[];
+    for(let i=0;i<n;i++){ const m=mesh(new THREE.SphereGeometry(size,10,8),mat.clone(),[0,0,0],false); m.material.transparent=true; g.add(m); ps.push([m,i/n,(rnd()-.5)*.6]); }
+    g.userData.update=(t,lt)=>ps.forEach(([m,ph,dx])=>{ const u=(lt*speed+ph)%1; m.position.set(dx*u+Math.sin(u*6+ph*9)*.15,u*rise,0); m.scale.setScalar(.5+u*1.6); m.material.opacity=.7*(1-u); }); return g; },
+  /** Ulir Archimedes (screw pump) berputar di dalam tabung bening, mengangkat air. */
+  screwPump(pos,{len=3,r=.35,angle=35,speed=2.5}={}){ const g=grp(pos), tilt=new THREE.Group(), spin=new THREE.Group(), turns=len/.5, seg=Math.round(turns*24), pts=[];
+    for(let i=0;i<=seg;i++){ const a=i/24*Math.PI*2; pts.push(new THREE.Vector3(Math.cos(a)*r*.8, i/seg*len, Math.sin(a)*r*.8)); }
+    spin.add(mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),seg,.05,6,false),M.metal('#c08a4a')), cyl(.06,.06,len,M.metal('#6b7279'),[0,len/2,0],10));
+    tilt.add(spin, cyl(r,r,len,M.std('#bfe3f5',{rough:.2,opacity:.3}),[0,len/2,0],24)); tilt.rotation.z=-(90-angle)*Math.PI/180; g.add(tilt);
+    g.userData.update=t=>{ spin.rotation.y=t*speed; }; return g; },
+  /** Roda kemudi katup yang diputar (valve). */
+  valve(pos,{r=.3,speed=1.5,color='#c0392b'}={}){ const g=grp(pos), wh=new THREE.Group(), mm=M.std(color,{rough:.5,metal:.3});
+    wh.add(mesh(new THREE.TorusGeometry(r,.035,8,28),mm)); for(let i=0;i<4;i++){ const s=box(r*2,.04,.04,mm); s.rotation.z=i*Math.PI/4; wh.add(s); } g.add(wh, cyl(.04,.04,.3,M.metal(),[0,0,-.15],8).rotateX(Math.PI/2));
+    g.userData.update=(t,lt)=>{ wh.rotation.z=Math.sin(lt*speed)*1.5; }; return g; },
+
+  /* ===== REKLAME / BRANDING KEPOTAU ===== */
+  /** Billboard iklan besar di atas dua kaki baja + lampu sorot. pos = tengah bawah, rot derajat. */
+  billboard(pos,{w=5,h=2.2,legs=3,rot=0,tagline='kepo? jadi tau.'}={}){ const g=grp(pos), mm=M.metal('#5d6670');
+    for(const x of [-w*.3,w*.3]) g.add(box(.18,legs,.18,mm,[x,legs/2,0]));
+    const tex=canvasTex(1024,Math.round(1024*h/w),(c,W,H)=>{ const gr=c.createLinearGradient(0,0,W,H); gr.addColorStop(0,'#2A2563'); gr.addColorStop(1,'#14112F'); c.fillStyle=gr; c.fillRect(0,0,W,H);
+      c.fillStyle='#F5B21B'; c.fillRect(0,H*.84,W,H*.16); const lw=W*.62, lh=lw*300/1040; if(LOGO_IMG) c.drawImage(LOGO_IMG,W*.06,H*.12,lw,lh);
+      c.fillStyle='#E3E7EF'; c.font=`700 ${Math.round(W*.05)}px Poppins,sans-serif`; c.textBaseline='middle'; c.fillText(tagline,W*.08,H*.12+lh+W*.05);
+      c.fillStyle='#1F1B4A'; c.font=`800 ${Math.round(H*.09)}px Poppins,sans-serif`; c.textAlign='center'; c.fillText('TIKTOK & INSTAGRAM  '+CONFIG.handle,W/2,H*.92); });
+    g.add(box(w+.16,h+.16,.16,M.std('#e9ecef',{rough:.5,metal:.3}),[0,legs+h/2,-.03]), mesh(new THREE.PlaneGeometry(w,h),M.std('#ffffff',{map:tex,rough:.55}),[0,legs+h/2,.06],false));
+    g.add(box(w,.06,.5,mm,[0,legs-.05,.3])); for(const x of [-w*.3,0,w*.3]){ g.add(box(.06,.06,.5,mm,[x,legs+h+.15,.2]), cyl(.08,.12,.18,M.std('#fff7d6',{rough:.3}),[x,legs+h+.1,.48],10)); }
+    g.rotation.y=rot*Math.PI/180; return g; },
+  /** Banner berdiri (roll-up / X-banner) seperti di pameran. */
+  standee(pos,{h=2,w=.8,rot=0}={}){ const g=grp(pos), tex=canvasTex(400,1000,(c,W,H)=>{ c.fillStyle='#1F1B4A'; c.fillRect(0,0,W,H); c.fillStyle='#F5B21B'; c.fillRect(0,0,W,H*.06); c.fillRect(0,H*.94,W,H*.06);
+      c.save(); c.translate(W/2,H/2); c.rotate(-Math.PI/2); const lw=H*.7, lh=lw*300/1040; if(LOGO_IMG) c.drawImage(LOGO_IMG,-lw/2,-lh/2,lw,lh); c.restore();
+      c.fillStyle='#E3E7EF'; c.font='700 40px Poppins,sans-serif'; c.textAlign='center'; c.fillText(CONFIG.handle,W/2,H*.9); });
+    g.add(box(w+.1,.08,.35,M.metal('#9aa3ab'),[0,.04,0]), mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshStandardMaterial({map:tex,side:THREE.DoubleSide,roughness:.7}),[0,h/2+.08,0]), cyl(.015,.015,h,M.metal(),[0,h/2+.08,-.03],6));
+    g.rotation.y=rot*Math.PI/180; return g; },
+  /** Untaian bendera segitiga (bunting) di antara dua tiang, kuning-navy berselang + logo kecil, bergoyang. */
+  bunting(a,b,{h=3,n=10,sag=.35}={}){ const g=grp(), A=new THREE.Vector3(a[0],a[1]+h,a[2]), B=new THREE.Vector3(b[0],b[1]+h,b[2]), mm=M.wood();
+    g.add(cyl(.05,.06,h,mm,[a[0],a[1]+h/2,a[2]],8), cyl(.05,.06,h,mm,[b[0],b[1]+h/2,b[2]],8));
+    const pts=[]; for(let i=0;i<=20;i++){ const u=i/20, p=A.clone().lerp(B,u); p.y-=Math.sin(Math.PI*u)*sag; pts.push(p); }
+    g.add(mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),20,.012,4,false),M.std('#eeeeee')));
+    const texY=logoTex(256,256,'#F5B21B'), texN=logoTex(256,256,'#1F1B4A'), flags=[];
+    for(let i=1;i<n;i++){ const u=i/n, p=A.clone().lerp(B,u); p.y-=Math.sin(Math.PI*u)*sag; const sh=new THREE.Shape(); sh.moveTo(-.22,0); sh.lineTo(.22,0); sh.lineTo(0,-.42); sh.lineTo(-.22,0);
+      const geo=new THREE.ShapeGeometry(sh); const uv=geo.attributes.uv; for(let k=0;k<uv.count;k++){ uv.setXY(k,(geo.attributes.position.getX(k)+.22)/.44,(geo.attributes.position.getY(k)+.42)/.42); }
+      const f=mesh(geo,new THREE.MeshStandardMaterial({map:i%2?texN:texY,side:THREE.DoubleSide,roughness:.9}),[p.x,p.y,p.z],false); f.rotation.y=-Math.atan2(B.z-A.z,B.x-A.x); g.add(f); flags.push(f); }
+    g.userData.update=t=>flags.forEach((f,i)=>{ f.rotation.x=Math.sin(t*3+i)*.25; }); return g; },
+  /** Poster/mural logo yang ditempel di dinding bangunan. pos = tengah poster, rot derajat (arah hadap). */
+  poster(pos,{w=1.6,h=.9,rot=0}={}){ const g=grp(pos, mesh(new THREE.PlaneGeometry(w,h),M.std('#ffffff',{map:logoTex(1024,Math.round(1024*h/w),'#1F1B4A'),rough:.7}),[0,0,0],false)); g.rotation.y=rot*Math.PI/180; return g; },
+  /** Set reklame otomatis di sepanjang tepi belakang sebuah area: billboard, bendera, standee, bunting bergantian.
+   *  x:[a,b] rentang area, z = garis belakang (mis. tepi belakang tanah + 0.8), skip = [[x0,x1],...] bagian yang dikosongkan. */
+  ads({x:[a,b],z=-4,every=7,skip=[]}){ const g=grp(); let k=0;
+    for(let x=a+2;x<=b-2;x+=every){ if(skip.some(([s0,s1])=>x>=s0&&x<=s1)) continue; const kind=k++%4;
+      if(kind===0) g.add(K.billboard([x,0,z],{w:4.4,h:1.9,legs:2.6,rot:(k*7%13)-6}));
+      else if(kind===1) g.add(K.flag([x-1,0,z+.6],{rot:-20}), K.flag([x+1,0,z+.4],{h:4,rot:-10}));
+      else if(kind===2) g.add(K.bunting([x-2.5,0,z+.3],[x+2.5,0,z+.3]), K.standee([x,0,z+1.2],{rot:-8}));
+      else g.add(K.banner([x,0,z+.3],{w:3,h:1.25,rot:(k*5%9)-4})); }
+    return g; },
   /** Primitif bebas. */
   box(pos,[w,h,d],color='#cccccc',o={}){ return grp(pos, box(w,h,d,M.std(color,o),[0,h/2,0])); },
   cylinder(pos,r,h,color='#cccccc',o={}){ return grp(pos, cyl(r,r,h,M.std(color,o),[0,h/2,0])); },
@@ -321,7 +456,7 @@ function setup(){
   buildOutro();
 }
 function applyObj(o,t){
-  const u=o.userData, b=u.base; if(u.from<0){ o.visible=!(u.until!=null&&t>=u.until); if(o.visible&&u.update) u.update(t,t); return; }
+  const u=o.userData, b=u.base; if(u.from<0){ o.visible=!(u.until!=null&&t>=u.until); if(o.visible) runUpdates(o,t,t); return; }
   const lt=t-u.from, gone=u.until!=null&&t>=u.until;
   o.visible = lt>=0 && !gone; if(!o.visible) return;
   const p=clamp(lt/.7);
@@ -334,8 +469,10 @@ function applyObj(o,t){
     case 'fade': o.traverse(c=>{ if(c.material&&c.userData.op!=null) c.material.opacity=c.userData.op*p; }); break;
     case 'dig': o.scale.y=Math.max(1e-3,b.s.y*(1-E.inOut(clamp(lt/(u.digDur||2.5))))); break;
   }
-  u.update&&u.update(t,lt);
+  runUpdates(o,t,lt);
 }
+/** Jalankan animasi semua bagian (termasuk prefab yang dibungkus di dalam grup lain). */
+function runUpdates(o,t,lt){ o.traverse(c=>{ if(c.userData.update) c.userData.update(t,lt); }); }
 /* ---------- kamera ----------
    cam bentuk preset: { focus:[x,y,z], dist, angle (derajat, 0 = dari depan/+z, positif = dari kanan), pitch (derajat ke bawah),
                         move: 'static'|'zoomIn'|'zoomOut'|'push'|'pull'|'orbitL'|'orbitR'|'craneUp'|'craneDown'|'truckL'|'truckR'|'reveal'|'dive'
@@ -416,6 +553,7 @@ function buildOutro(){
 function render(t){
   t=clamp(t,0,TOTAL-.001);
   const sh=TL.find(o=>t<o.end)||TL[TL.length-1], out=document.getElementById('outro');
+  document.getElementById('logo').style.opacity=sh.s.type==='outro'?Math.max(0,1-(t-sh.start)/.3):1;
   if(sh.s.type==='outro'){ out.style.visibility='visible'; out.style.opacity=clamp((t-sh.start)/.35); outroAnims.forEach(a=>a.currentTime=(t-sh.start)*1000); }
   else out.style.visibility='hidden';
   if(sh.s.type!=='outro' || t-sh.start<.35){ const tt=sh.s.type==='outro'?sh.start-.001:t; camAt(tt); OBJS.forEach(o=>applyObj(o,tt)); renderer.render(scene,camera); }
@@ -444,7 +582,9 @@ addEventListener('keydown',e=>{ if(e.code==='Space'){e.preventDefault();playing?
 window.__TOTAL=TOTAL;
 window.__SCENES=TL.map(o=>({start:o.start,end:o.end,dur:o.end-o.start,minDur:o.s.minDur||0,big:o.s.say||o.s.type,vo:voText(o.s)}));
 window.__seek=t=>render(t);
-window.__ready=Promise.all(["800 76px 'Plus Jakarta Sans'","600 120px 'Plus Jakarta Sans'","900 104px Poppins","600 36px Poppins"].map(f=>document.fonts.load(f).catch(()=>{})))
+const logoLoad=new Promise(r=>{ const im=new Image(); im.onload=()=>{ LOGO_IMG=im; r(); }; im.onerror=()=>r(); im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(LOGO_SVG.replace('<svg ','<svg width="1040" height="300" ')); });
+document.getElementById('logo').innerHTML=LOGO_SVG;
+window.__ready=logoLoad.then(()=>Promise.all(["800 76px 'Plus Jakarta Sans'","600 120px 'Plus Jakarta Sans'","900 104px Poppins","600 36px Poppins"].map(f=>document.fonts.load(f).catch(()=>{}))))
   .then(()=>document.fonts.ready).then(()=>{ setup(); pos=Q.has('t')?+Q.get('t'):(Q.has('render')?0:1.5); render(pos); if(Q.has('autoplay')) play(); return TOTAL; });
 </script>
 </body>

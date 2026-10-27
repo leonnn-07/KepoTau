@@ -25,12 +25,16 @@ merancang dunia 3D (`WORLD`) dan urutan shot (`SHOTS`).
   kayak teh susu". Masalah → solusi → masalah baru → solusi lebih maju.
 - **Penanda era**: papan putih bertiang berisi tahun (1582 → 1829 → 1900-an), muncul dengan bunyi *ding*.
 - **Caption** putih tebal di tengah layar, 1–3 kata muncul satu per satu mengikuti suara (otomatis dari `say`).
-- **Branding KepoTau**: papan biru KepoTau + @kepotau.ofc di dalam adegan (`K.brandBoard`, otomatis
-  ada di tangki menara), watermark @kepotau.ofc, dan outro logo KepoTau terisi warna + 2 baris akun
-  (ikon TikTok & Instagram). Brand dan handle sudah default di `CONFIG`, tidak perlu ditanyakan.
-
-## Input
-
+- **Branding KepoTau** (akun khusus 3D: **@3d.kepotau.ofc** di TikTok & Instagram, sudah default
+  di `CONFIG`): logo resmi kecil berbingkai kaca di **pojok kiri atas** (otomatis, bukan di tengah),
+  dan **banyak reklame di dalam dunia 3D** seperti iklan sungguhan: pasang `K.ads(...)` di sepanjang
+  tepi belakang setiap area (billboard, bendera, bunting, standee, spanduk bergantian), tempel
+  `K.poster` di dinding bangunan, plus `K.flag`/`K.banner` di dekat objek utama. Watermark handle di
+  kanan bawah dan outro logo + 2 baris akun (ikon TikTok & Instagram) juga otomatis.
+- **Detail & animasi mekanis**: setiap mesin memperlihatkan cara kerjanya. Gerigi = `K.gear`/`K.gears`
+  yang berputar dan saling mengunci, piston = `K.crankPiston`, sabuk = `K.conveyor`, kipas/turbin =
+  `K.turbine`, palu = `K.press`, asap = `K.smoke`. Jangan memakai tabung atau kotak diam sebagai
+  pengganti mesin; objek yang di dunia nyata bergerak harus bergerak juga.
 - **Topik** (wajib). Jika hanya topik, tulis naskahnya sendiri (lihat struktur di bawah) dan tampilkan
   tabelnya di jawaban akhir, tanpa berhenti meminta persetujuan.
 - **Naskah** (opsional): satu kalimat per baris; boleh disertai ide visual setelah `|`.

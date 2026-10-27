@@ -74,7 +74,9 @@ grow lainnya → `swish`.
 | Prefab | Keterangan |
 |---|---|
 | `sign(pos, '1582', {w,h,rot})` | papan putih bertiang, untuk tahun/era/nama tempat |
-| `brandBoard(pos, rotY, scale)` | papan biru **KepoTau + @kepotau.ofc**; tempel di dinding/tangki (pos = tengah papan) |
+| `brandBoard(pos, rotY, scale)` | papan berlogo resmi KepoTau + @kepotau.ofc; tempel di dinding/tangki (pos = tengah papan) |
+| `banner(pos, {w, h, pole, rot})` | **spanduk kain** berlogo KepoTau di antara dua tiang, berkibar pelan |
+| `flag(pos, {h, fw, fh, rot})` | **bendera** berlogo KepoTau di tiang tinggi, berkibar (kain memanjang ke +x lokal; putar `rot` 180 untuk ke kiri) |
 | `label(pos, text)` | label pil putih melayang (selalu menghadap kamera, terlihat menembus objek). Otomatis hilang di akhir shot tempat ia muncul; set `userData.keep = true` agar bertahan |
 
 **Partikel & primitif**
@@ -83,6 +85,46 @@ grow lainnya → `swish`.
 |---|---|
 | `particles(pos, [w,h,d], {n, color, size, motion})` | butiran di dalam kotak; motion `down` (air menetes/mengalir), `up` (gelembung), `settle` (kotoran mengendap ke atas lapisan), `float` |
 | `box(pos, [w,h,d], color)`, `cylinder(pos, r, h, color)` | primitif bebas |
+
+## Mesin dengan bagian bergerak
+
+Setiap mesin harus **memperlihatkan cara kerjanya**: gerigi berputar dan saling mengunci, piston
+naik-turun, sabuk berjalan, baling-baling berputar. Jangan mewakili mesin dengan tabung/kotak diam.
+Jika prefab di bawah tidak cukup, buat sendiri dari bagian-bagiannya dan animasikan lewat
+`userData.update` (animasi bagian yang dibungkus di dalam grup tetap berjalan otomatis).
+
+| Prefab | Gerak |
+|---|---|
+| `gear(pos, {r, teeth, thick, speed, color, axis})` | roda gigi bergerigi + jari-jari, berputar (axis `z` menghadap kamera, `y` rebah) |
+| `gears(pos, {list:[{r,teeth}], speed, angle})` | rangkaian gigi yang **benar-benar mengunci**: posisi, fase gigi, arah (berlawanan) & rasio kecepatan dihitung otomatis. Pakai teeth ≈ 20 × r agar ukuran gigi sama |
+| `crankPiston(pos, {r, rod, speed, bore})` | roda engkol berputar → batang penghubung → piston naik-turun di silinder bening (mesin, pompa, kompresor) |
+| `turbine(pos, {r, blades, speed, axis})` | turbin/baling-baling/kipas berputar |
+| `conveyor(pos, {len, w, h, speed, items, item})` | ban berjalan: sabuk bergeser, rol berputar, barang ikut berjalan (`item` warna atau fungsi pembuat objek) |
+| `press(pos, {w, h, speed, color})` | mesin press: palu menghantam lalu naik (pabrik, cetak logam) |
+| `screwPump(pos, {len, r, angle, speed})` | ulir Archimedes berputar di tabung bening |
+| `valve(pos, {r, speed, color})` | roda katup diputar bolak-balik |
+| `smoke(pos, {n, rise, size, color})` | asap/uap naik dan membesar (cerobong, ketel, mesin uap) |
+| `waterWheel`, `pump`, `handPump`, `person` | (lihat atas) juga beranimasi |
+
+Kecepatan: putaran lambat lebih "terbaca" (speed 0.6–2 rad/dtk untuk gigi besar). Untuk transmisi
+(kincir → gigi → piston), samakan arah/kecepatan logisnya: gigi pertama mengikuti kecepatan poros.
+
+## Reklame / branding KepoTau
+
+Video 3D memakai banyak branding **di dalam dunia** seperti iklan sungguhan (selain logo kecil di
+pojok kiri atas yang otomatis). Semua memakai logo resmi + handle `CONFIG.handle` (@3d.kepotau.ofc).
+
+| Prefab | Keterangan |
+|---|---|
+| `ads({x:[a,b], z, every, skip})` | **pasang ini di setiap area**: deretan reklame otomatis di sepanjang tepi belakang (billboard → 2 bendera → bunting + standee → spanduk, bergantian). `skip` mengosongkan rentang x di belakang objek penting |
+| `billboard(pos, {w, h, legs, rot, tagline})` | billboard iklan besar berkaki baja + lampu sorot, berisi logo, tagline, dan "TIKTOK & INSTAGRAM @handle" |
+| `standee(pos, {h, w, rot})` | roll-up banner berdiri |
+| `bunting(a, b, {h, n, sag})` | untaian bendera segitiga kuning-navy berlogo di antara dua tiang, bergoyang |
+| `poster(pos, {w, h, rot})` | poster logo yang ditempel di dinding bangunan (tempel di rumah, pabrik, tangki) |
+| `banner`, `flag`, `brandBoard` | spanduk kain, bendera berkibar, papan logo |
+
+Aturan: minimal satu reklame tertangkap kamera di hampir setiap shot (selain close-up detail), tapi
+jangan menutupi objek utama atau caption. Untuk bangunan, tempel `poster` di dindingnya.
 
 ## Objek baru (custom)
 
